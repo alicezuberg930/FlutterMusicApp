@@ -26,7 +26,7 @@ class Song {
       title: 'Shiro Sagisu, Yoko Takahashi - The Cruel Angel"s Thesis',
       description: 'Nhạc nhật',
       url:
-          'assets/music/Shiro Sagisu, Yoko Takahashi- The Cruel Angel\'s Thesis.mp3',
+          "assets/music/Shiro Sagisu, Yoko Takahashi - The Cruel Angel's Thesis.mp3",
       coverUrl: 'assets/image/OG_Daniel_After_Training_Fight.jpg',
     ),
     Song(

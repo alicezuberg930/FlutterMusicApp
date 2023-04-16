@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/models/song.dart';
-import 'package:flutter_music_app/widgets/player_button.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
-
 import '../widgets/seekbar.dart';
 
 class SongPage extends StatefulWidget {
-  final Song song;
-  const SongPage({Key? key, required this.song}) : super(key: key);
+  final int index;
+  final List<Song> song;
+  const SongPage({Key? key, required this.song, required this.index})
+      : super(key: key);
 
   @override
   State<SongPage> createState() => _SongPageState();
 }
 
 class _SongPageState extends State<SongPage> {
+  int songIndex = 0;
   AudioPlayer audioPlayer = AudioPlayer();
   Stream<SeekBarData> get seekBarDataStream =>
       rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
@@ -30,14 +31,17 @@ class _SongPageState extends State<SongPage> {
 
   @override
   void initState() {
+    songIndex = widget.index;
     audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         children: [
-          AudioSource.uri(
-            Uri.parse('asset:///${widget.song.url}'),
-          )
+          for (int i = 0; i < widget.song.length; i++)
+            AudioSource.uri(
+              Uri.parse('asset:///${widget.song[i].url}'),
+            )
         ],
       ),
+      initialIndex: songIndex,
     );
     super.initState();
   }
@@ -60,11 +64,11 @@ class _SongPageState extends State<SongPage> {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            widget.song.coverUrl,
+            widget.song[songIndex].coverUrl,
             fit: BoxFit.cover,
           ),
           backgroundFilter(),
-          musicPlayerWidget(widget.song),
+          musicPlayerWidget(widget.song[songIndex]),
         ],
       ),
     );
@@ -106,7 +110,7 @@ class _SongPageState extends State<SongPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              PlayerButton(audioPlayer: audioPlayer),
+              playerButton(audioPlayer),
             ],
           ),
           Row(
@@ -147,6 +151,114 @@ class _SongPageState extends State<SongPage> {
           )
         ],
       ),
+    );
+  }
+
+  playerButton(AudioPlayer audioPlayer) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        StreamBuilder(
+          stream: audioPlayer.sequenceStateStream,
+          builder: (context, snapshot) {
+            return IconButton(
+              iconSize: 60,
+              color:
+                  audioPlayer.hasPrevious ? Colors.blue.shade400 : Colors.grey,
+              onPressed: () {
+                if (audioPlayer.hasPrevious) {
+                  audioPlayer.seekToPrevious();
+                }
+                if (songIndex > 0) {
+                  setState(() {
+                    songIndex -= 1;
+                  });
+                }
+              },
+              icon: const Icon(
+                Icons.skip_previous,
+              ),
+            );
+          },
+        ),
+        StreamBuilder(
+          stream: audioPlayer.playerStateStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final playerState = snapshot.data;
+              final processingState =
+                  (playerState! as PlayerState).processingState;
+              if (processingState == ProcessingState.loading ||
+                  processingState == ProcessingState.buffering) {
+                return Container(
+                  width: 64,
+                  height: 64,
+                  margin: const EdgeInsets.all(10),
+                  child: const CircularProgressIndicator(),
+                );
+              } else if (!audioPlayer.playing) {
+                return IconButton(
+                  onPressed: () {
+                    audioPlayer.play();
+                  },
+                  iconSize: 60,
+                  icon: Icon(
+                    Icons.play_circle,
+                    color: Colors.blue.shade400,
+                  ),
+                );
+              } else if (processingState != ProcessingState.completed) {
+                return IconButton(
+                  onPressed: () {
+                    audioPlayer.pause();
+                  },
+                  iconSize: 60,
+                  icon: Icon(
+                    Icons.pause_circle,
+                    color: Colors.blue.shade400,
+                  ),
+                );
+              } else {
+                return IconButton(
+                  onPressed: () {
+                    audioPlayer.seek(Duration.zero,
+                        index: audioPlayer.effectiveIndices!.first);
+                  },
+                  iconSize: 60,
+                  icon: Icon(
+                    Icons.replay_circle_filled_outlined,
+                    color: Colors.blue.shade300,
+                  ),
+                );
+              }
+            } else {
+              return const CircularProgressIndicator();
+            }
+          },
+        ),
+        StreamBuilder(
+          stream: audioPlayer.sequenceStateStream,
+          builder: (context, snapshot) {
+            return IconButton(
+              iconSize: 60,
+              color: audioPlayer.hasNext ? Colors.blue.shade400 : Colors.grey,
+              onPressed: () {
+                if (audioPlayer.hasNext) {
+                  audioPlayer.seekToNext();
+                }
+                if (songIndex < widget.song.length - 1) {
+                  setState(() {
+                    songIndex += 1;
+                  });
+                }
+              },
+              icon: const Icon(
+                Icons.skip_next,
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

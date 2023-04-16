@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: PlaylistPage(playlist: Playlist.playlists[0]),
+      home: const HomePage(),
       title: "Flutter music app",
       theme: ThemeData(
         textTheme: Theme.of(context)

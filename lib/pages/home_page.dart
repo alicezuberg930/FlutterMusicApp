@@ -15,6 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  PageController pageController = PageController();
+  int selectedIndex = 0;
   List<Song> songs = Song.songs;
   List<Playlist> playlists = Playlist.playlists;
   @override
@@ -34,14 +36,27 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         appBar: const CustomAppbar(),
         bottomNavigationBar: customNavigationBar(),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              searchWidget(),
-              trendingMusic(songs),
-              playlistWidget(),
-            ],
-          ),
+        body: PageView(
+          controller: pageController,
+          onPageChanged: (value) {
+            setState(() {
+              selectedIndex = value;
+            });
+          },
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  searchWidget(),
+                  trendingMusic(songs),
+                  playlistWidget(),
+                ],
+              ),
+            ),
+            Text("Favorite"),
+            Text("Nhạc trên máy"),
+            Text("Profile"),
+          ],
         ),
       ),
     );
@@ -156,19 +171,36 @@ class _HomePageState extends State<HomePage> {
 
   customNavigationBar() {
     return BottomNavigationBar(
+      currentIndex: selectedIndex,
+      onTap: (value) {
+        pageController.animateToPage(
+          value,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+      },
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: false,
       backgroundColor: Colors.deepPurple.shade800,
       unselectedItemColor: Colors.white,
       selectedItemColor: Colors.white,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Trang chủ"),
         BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline), label: "Yêu thích"),
+          icon: Icon(Icons.home),
+          label: "Trang chủ",
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.play_circle_fill_outlined), label: "Phát"),
+          icon: Icon(Icons.favorite_outline),
+          label: "Yêu thích",
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline), label: "Hồ sơ"),
+          icon: Icon(Icons.play_circle_fill_outlined),
+          label: "Phát",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people_outline),
+          label: "Hồ sơ",
+        ),
       ],
     );
   }
@@ -208,6 +240,7 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
               ),
+              labelStyle: const TextStyle(color: Colors.grey),
             ),
           )
         ],

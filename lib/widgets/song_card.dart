@@ -4,10 +4,7 @@ import '../models/song.dart';
 
 class SongCard extends StatelessWidget {
   final Song song;
-  const SongCard({
-    super.key,
-    required this.song,
-  });
+  const SongCard({super.key, required this.song});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +13,10 @@ class SongCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SongPage(song: song),
+            builder: (context) => SongPage(
+              song: [song],
+              index: 0,
+            ),
           ),
         );
       },

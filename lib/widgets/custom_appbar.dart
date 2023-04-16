@@ -14,7 +14,9 @@ class CustomAppbar extends StatelessWidget with PreferredSizeWidget {
           margin: const EdgeInsets.only(right: 20),
           child: const CircleAvatar(
             radius: 20,
-            backgroundImage: NetworkImage('fsef'),
+            backgroundImage: NetworkImage(
+              'https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg',
+            ),
           ),
         )
       ],
