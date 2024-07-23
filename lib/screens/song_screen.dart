@@ -141,13 +141,7 @@ class _SongPageState extends State<SongScreen> {
                 onPressed: () {},
                 iconSize: 30,
                 color: Colors.white,
-                icon: const Icon(Icons.heart_broken),
-              ),
-              IconButton(
-                onPressed: () {},
-                iconSize: 30,
-                color: Colors.white,
-                icon: const Icon(Icons.comment),
+                icon: const Icon(Icons.thumb_up),
               ),
               IconButton(
                 onPressed: () {},
@@ -161,12 +155,12 @@ class _SongPageState extends State<SongScreen> {
                 color: Colors.white,
                 icon: const Icon(Icons.download),
               ),
-              IconButton(
-                onPressed: () {},
-                iconSize: 30,
-                color: Colors.white,
-                icon: const Icon(Icons.settings),
-              )
+              // IconButton(
+              //   onPressed: () {},
+              //   iconSize: 30,
+              //   color: Colors.white,
+              //   icon: const Icon(Icons.settings),
+              // )
             ],
           )
         ],

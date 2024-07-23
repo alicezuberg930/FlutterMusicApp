@@ -1,3 +1,3 @@
 class Constants {
-  static String apiUrl = "http://192.168.2.17:3000/api/v2";
+  static String apiUrl = "https://7c67-125-235-239-252.ngrok-free.app/api/v2";
 }
