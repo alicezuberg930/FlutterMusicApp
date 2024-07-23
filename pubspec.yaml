@@ -9,6 +9,9 @@ environment:
 dependencies:
   just_audio: ^0.9.28
   rxdart: ^0.27.5
+  dio: ^4.0.6
+  dio_http_cache_lts: ^0.4.0
+
   
   flutter:
     sdk: flutter

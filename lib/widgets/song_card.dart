@@ -1,10 +1,13 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
-import 'package:flutter_music_app/pages/song_page.dart';
-import '../models/song.dart';
+import 'package:flutter_music_app/models/song.dart';
+import 'package:flutter_music_app/screens/song_screen.dart';
 
 class SongCard extends StatelessWidget {
+  bool? isOnline;
   final Song song;
-  const SongCard({super.key, required this.song});
+  SongCard({super.key, required this.song, this.isOnline});
 
   @override
   Widget build(BuildContext context) {
@@ -13,79 +16,50 @@ class SongCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SongPage(
-              song: [song],
-              index: 0,
-            ),
+            builder: (context) => SongScreen(song: [song], index: 0, isOnline: isOnline),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(right: 10),
-        child: Stack(
-          alignment: Alignment.bottomCenter,
+        margin: const EdgeInsets.only(right: 15),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width * 0.45,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                image: DecorationImage(
-                  image: AssetImage(song.coverUrl),
-                  fit: BoxFit.cover,
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image(
+                image: Image.network(song.thumbnailM!).image,
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.35,
+                fit: BoxFit.cover,
               ),
             ),
-            Container(
-              height: 50,
-              // padding: const EdgeInsets.symmetric(horizontal: 5),
-              width: MediaQuery.of(context).size.width * 0.4,
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.white.withOpacity(0.8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: Text.rich(
-                          TextSpan(
-                            text: song.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple,
-                                ),
-                            children: const [
-                              TextSpan(
-                                text: "..",
-                                style: TextStyle(color: Colors.deepPurple),
-                              ),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      song.title!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: 16,
                       ),
-                      Text(
-                        song.description,
-                        style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black.withOpacity(0.5),
-                            ),
-                      ),
-                    ],
-                  ),
-                  const Icon(Icons.play_circle, color: Colors.deepPurple)
-                ],
-              ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      song.artistsNames!,
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.black.withOpacity(0.5)),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

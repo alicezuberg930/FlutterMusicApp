@@ -1,19 +1,17 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/models/playlist.dart';
-import 'package:flutter_music_app/pages/song_page.dart';
+import 'package:flutter_music_app/screens/song_screen.dart';
 import 'package:just_audio/just_audio.dart';
 
-class PlaylistPage extends StatefulWidget {
+class PlaylistScreen extends StatefulWidget {
   final Playlist playlist;
-  const PlaylistPage({Key? key, required this.playlist}) : super(key: key);
+  const PlaylistScreen({Key? key, required this.playlist}) : super(key: key);
 
   @override
-  State<PlaylistPage> createState() => _PlaylistPageState();
+  State<PlaylistScreen> createState() => _PlaylistPageState();
 }
 
-class _PlaylistPageState extends State<PlaylistPage> {
+class _PlaylistPageState extends State<PlaylistScreen> {
   bool isPlay = true;
   int index = 0;
   AudioPlayer audioPlayer = AudioPlayer();
@@ -25,7 +23,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
         children: [
           for (int i = 0; i < widget.playlist.song.length; i++)
             AudioSource.uri(
-              Uri.parse('asset:///${widget.playlist.song[i].url}'),
+              Uri.parse('asset:///${widget.playlist.song[i].title}'),
             )
         ],
       ),
@@ -67,10 +65,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         final playerState = snapshot.data;
-                        final processingState =
-                            (playerState! as PlayerState).processingState;
-                        if (processingState == ProcessingState.loading ||
-                            processingState == ProcessingState.buffering) {
+                        final processingState = (playerState!).processingState;
+                        if (processingState == ProcessingState.loading || processingState == ProcessingState.buffering) {
                           return Container(
                             width: 30,
                             height: 30,
@@ -109,7 +105,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     padding: const EdgeInsets.only(left: 15),
                     width: MediaQuery.of(context).size.width * 0.7,
                     child: Text(
-                      widget.playlist.song[audioPlayer.currentIndex!].title,
+                      widget.playlist.song[audioPlayer.currentIndex!].title!,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -157,10 +153,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                   const SizedBox(height: 30),
                   Text(
                     widget.playlist.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30),
                   Container(
@@ -174,9 +167,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                       children: [
                         AnimatedPositioned(
                           duration: const Duration(milliseconds: 200),
-                          left: isPlay
-                              ? 0
-                              : MediaQuery.of(context).size.width * 0.45,
+                          left: isPlay ? 0 : MediaQuery.of(context).size.width * 0.45,
                           child: Container(
                             width: MediaQuery.of(context).size.width * 0.45,
                             height: 50,
@@ -203,9 +194,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                                       child: Text(
                                         "Phát",
                                         style: TextStyle(
-                                          color: isPlay
-                                              ? Colors.white
-                                              : Colors.deepPurple,
+                                          color: isPlay ? Colors.white : Colors.deepPurple,
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -214,9 +203,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                                     const SizedBox(width: 10),
                                     Icon(
                                       Icons.play_circle,
-                                      color: isPlay
-                                          ? Colors.white
-                                          : Colors.deepPurple,
+                                      color: isPlay ? Colors.white : Colors.deepPurple,
                                     )
                                   ],
                                 ),
@@ -237,9 +224,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                                       child: Text(
                                         "Xáo trộn",
                                         style: TextStyle(
-                                          color: isPlay
-                                              ? Colors.deepPurple
-                                              : Colors.white,
+                                          color: isPlay ? Colors.deepPurple : Colors.white,
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -248,9 +233,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                                     const SizedBox(width: 10),
                                     Icon(
                                       Icons.shuffle,
-                                      color: isPlay
-                                          ? Colors.deepPurple
-                                          : Colors.white,
+                                      color: isPlay ? Colors.deepPurple : Colors.white,
                                     )
                                   ],
                                 ),
@@ -281,7 +264,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => SongPage(
+                                builder: (context) => SongScreen(
                                   song: widget.playlist.song,
                                   index: index,
                                 ),
@@ -290,25 +273,17 @@ class _PlaylistPageState extends State<PlaylistPage> {
                           },
                           leading: Text(
                             '${index + 1}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
                           title: Text(
-                            widget.playlist.song[index].title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
+                            widget.playlist.song[index].title!,
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
-                          subtitle: Text(
-                              widget.playlist.song[index].description,
-                              style: Theme.of(context).textTheme.bodySmall!),
+                          subtitle: Text(widget.playlist.song[index].artistsNames!, style: Theme.of(context).textTheme.bodySmall!),
                           trailing: const Icon(
                             Icons.more_vert,
                             color: Colors.white,

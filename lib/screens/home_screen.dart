@@ -1,24 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/song.dart';
-import 'package:flutter_music_app/pages/playlist_page.dart';
+import 'package:flutter_music_app/screens/playlist_screen.dart';
+import 'package:flutter_music_app/service/api_service.dart';
 import 'package:flutter_music_app/widgets/custom_appbar.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
+import 'package:flutter_music_app/widgets/song_card.dart';
 
-import '../widgets/song_card.dart';
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomeScreen> {
   PageController pageController = PageController();
   int selectedIndex = 0;
-  List<Song> songs = Song.songs;
-  List<Playlist> playlists = Playlist.playlists;
+  List<Song> homeSongs = [];
+  // List<Playlist> playlists = Playlist.playlists;
+  ApiService apiService = ApiService();
+
+  @override
+  void initState() {
+    getHome();
+    super.initState();
+  }
+
+  getHome() async {
+    homeSongs = await apiService.getHome();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -48,39 +60,39 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   searchWidget(),
-                  trendingMusic(songs),
-                  playlistWidget(),
+                  trendingMusic(homeSongs),
+                  // playlistWidget(),
                 ],
               ),
             ),
-            Text("Favorite"),
-            Text("Nhạc trên máy"),
-            Text("Profile"),
+            const Text("Favorite"),
+            const Text("Nhạc trên máy"),
+            const Text("Profile"),
           ],
         ),
       ),
     );
   }
 
-  playlistWidget() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const SectionHeader(title: 'Playlist'),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(top: 15),
-            shrinkWrap: true,
-            itemCount: playlists.length,
-            itemBuilder: (context, index) {
-              return playlistCard(playlists[index]);
-            },
-          )
-        ],
-      ),
-    );
-  }
+  // playlistWidget() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(20),
+  //     child: Column(
+  //       children: [
+  //         const SectionHeader(title: 'Playlist'),
+  //         ListView.builder(
+  //           physics: const NeverScrollableScrollPhysics(),
+  //           padding: const EdgeInsets.only(top: 15),
+  //           shrinkWrap: true,
+  //           itemCount: playlists.length,
+  //           itemBuilder: (context, index) {
+  //             return playlistCard(playlists[index]);
+  //           },
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
   playlistCard(Playlist playlist) {
     return InkWell(
@@ -88,16 +100,14 @@ class _HomePageState extends State<HomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PlaylistPage(playlist: playlist),
+            builder: (context) => PlaylistScreen(playlist: playlist),
           ),
         );
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-            color: Colors.deepPurple.shade800.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(15)),
+        decoration: BoxDecoration(color: Colors.deepPurple.shade800.withOpacity(0.8), borderRadius: BorderRadius.circular(15)),
         height: 75,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -124,7 +134,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                   ),
                   Text(
-                    '${playlist.song.length} bài hát',
+                    '${playlist.song.length} songs',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -150,17 +160,17 @@ class _HomePageState extends State<HomePage> {
         children: [
           const Padding(
             padding: EdgeInsets.only(right: 15),
-            child: SectionHeader(
-              title: 'Trending Music',
-            ),
+            child: SectionHeader(title: 'Trending Music'),
           ),
+          const SizedBox(height: 10),
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.27,
+            height: MediaQuery.of(context).size.height * 0.4,
             child: ListView.builder(
+              shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               itemCount: songs.length,
               itemBuilder: (context, index) {
-                return SongCard(song: songs[index]);
+                return SongCard(song: songs[index], isOnline: true);
               },
             ),
           ),
@@ -212,30 +222,26 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Chào mừng',
+            'Welcome',
             style: Theme.of(context).textTheme.bodyLarge!,
           ),
           const SizedBox(height: 5),
           Text(
             'Enjoy your favorite music',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge!
-                .copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           TextFormField(
+            onFieldSubmitted: (value) async {
+              await apiService.getHome();
+              // print(value);
+            },
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Colors.purple[200],
               hintText: "Tìm kiếm",
-              hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade400,
-                  ),
-              prefixIcon: Icon(
-                Icons.search,
-                color: Colors.grey.shade400,
-              ),
+              hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
+              prefixIcon: const Icon(Icons.search, color: Colors.white),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,

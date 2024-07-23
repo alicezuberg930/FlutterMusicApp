@@ -1,24 +1,28 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/models/song.dart';
+import 'package:flutter_music_app/service/api_service.dart';
+import 'package:flutter_music_app/widgets/seekbar.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
-import '../widgets/seekbar.dart';
 
-class SongPage extends StatefulWidget {
+class SongScreen extends StatefulWidget {
   final int index;
   final List<Song> song;
-  const SongPage({Key? key, required this.song, required this.index})
-      : super(key: key);
+  bool? isOnline;
+  SongScreen({Key? key, required this.song, required this.index, this.isOnline}) : super(key: key);
 
   @override
-  State<SongPage> createState() => _SongPageState();
+  State<SongScreen> createState() => _SongPageState();
 }
 
-class _SongPageState extends State<SongPage> {
+class _SongPageState extends State<SongScreen> {
   int songIndex = 0;
   AudioPlayer audioPlayer = AudioPlayer();
-  Stream<SeekBarData> get seekBarDataStream =>
-      rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
+  ApiService apiService = ApiService();
+  Stream<SeekBarData> get seekBarDataStream => rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
         audioPlayer.positionStream,
         audioPlayer.durationStream,
         (Duration position, Duration? duration) {
@@ -31,13 +35,17 @@ class _SongPageState extends State<SongPage> {
 
   @override
   void initState() {
+    if (widget.isOnline == true) {
+      initOnlineSong();
+      return;
+    }
     songIndex = widget.index;
     audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         children: [
           for (int i = 0; i < widget.song.length; i++)
             AudioSource.uri(
-              Uri.parse('asset:///${widget.song[i].url}'),
+              Uri.parse('asset:///${widget.song[i].title}'),
             )
         ],
       ),
@@ -52,6 +60,18 @@ class _SongPageState extends State<SongPage> {
     super.dispose();
   }
 
+  initOnlineSong() async {
+    Song? song = await apiService.getInfo(encodeId: widget.song[0].encodeId!);
+    if (song == null && context.mounted) {
+      UIHelpers.showSnackBar(context, Colors.red, "Bài hát chỉ dành cho tài khoản VIP");
+      return;
+    }
+    audioPlayer.setAudioSource(
+      AudioSource.uri(Uri.parse(song!.q128!)),
+      initialIndex: songIndex,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,8 +83,8 @@ class _SongPageState extends State<SongPage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            widget.song[songIndex].coverUrl,
+          Image.network(
+            widget.song[songIndex].thumbnailM!,
             fit: BoxFit.cover,
           ),
           backgroundFilter(),
@@ -82,7 +102,7 @@ class _SongPageState extends State<SongPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            song.title,
+            song.title!,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -90,7 +110,7 @@ class _SongPageState extends State<SongPage> {
           ),
           const SizedBox(height: 10),
           Text(
-            song.description,
+            song.artistsNames!,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   color: Colors.white,
                 ),
@@ -163,8 +183,7 @@ class _SongPageState extends State<SongPage> {
           builder: (context, snapshot) {
             return IconButton(
               iconSize: 60,
-              color:
-                  audioPlayer.hasPrevious ? Colors.blue.shade400 : Colors.grey,
+              color: audioPlayer.hasPrevious ? Colors.blue.shade400 : Colors.grey,
               onPressed: () {
                 if (audioPlayer.hasPrevious) {
                   audioPlayer.seekToPrevious();
@@ -186,10 +205,8 @@ class _SongPageState extends State<SongPage> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final playerState = snapshot.data;
-              final processingState =
-                  (playerState! as PlayerState).processingState;
-              if (processingState == ProcessingState.loading ||
-                  processingState == ProcessingState.buffering) {
+              final processingState = (playerState!).processingState;
+              if (processingState == ProcessingState.loading || processingState == ProcessingState.buffering) {
                 return Container(
                   width: 64,
                   height: 64,
@@ -221,8 +238,7 @@ class _SongPageState extends State<SongPage> {
               } else {
                 return IconButton(
                   onPressed: () {
-                    audioPlayer.seek(Duration.zero,
-                        index: audioPlayer.effectiveIndices!.first);
+                    audioPlayer.seek(Duration.zero, index: audioPlayer.effectiveIndices!.first);
                   },
                   iconSize: 60,
                   icon: Icon(
