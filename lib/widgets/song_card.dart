@@ -20,49 +20,64 @@ class SongCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.only(right: 15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image(
-                image: Image.network(song.thumbnailM!).image,
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.35,
-                fit: BoxFit.cover,
-              ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image(
+              image: Image.network(song.thumbnail!).image,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      song.title!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      song.artistsNames!,
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.black.withOpacity(0.5)),
-                    ),
-                  ],
+                Text(
+                  song.title!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  song.artistsNames!,
+                  style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.black.withOpacity(0.5)),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          InkWell(
+            child: const Icon(Icons.more_vert),
+            onTap: () {
+              showModalBottomSheet(
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                context: context,
+                builder: (context) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        leading: const Icon(Icons.download, color: Colors.black),
+                        title: const Text("Download", style: TextStyle(color: Colors.black)),
+                      )
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
     );
   }

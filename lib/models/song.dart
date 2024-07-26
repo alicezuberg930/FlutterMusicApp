@@ -4,8 +4,9 @@ class Song {
   String? encodeId;
   String? title;
   String? artistsNames;
-  List<Artist> artists = [];
+  List<Artist>? artists;
   String? thumbnailM;
+  String? thumbnail;
   String? link;
   int? duration;
   List<dynamic>? genreIds;
@@ -16,8 +17,9 @@ class Song {
     this.encodeId,
     this.title,
     this.artistsNames,
-    required this.artists,
+    this.artists,
     this.thumbnailM,
+    this.thumbnail,
     this.link,
     this.duration,
     this.genreIds,
@@ -27,13 +29,14 @@ class Song {
 
   factory Song.fromJson(Map<String, dynamic> json) {
     List<Artist> tempArtists = [];
-    json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
+    if (json['artists'].isNotEmpty) json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
     return Song(
       encodeId: json['encodeId'],
       title: json['title'],
       artistsNames: json['artistsNames'],
       artists: tempArtists,
       thumbnailM: json['thumbnailM'],
+      thumbnail: json['thumbnail'],
       link: json['link'],
       duration: json['duration'],
       genreIds: json['genreIds'],
@@ -51,7 +54,7 @@ class Song {
       "link": link,
       "duration": duration,
       "genreIds": genreIds,
-      "artists": artists[0].toJson()
+      "artists": artists![0].toJson()
     };
   }
 

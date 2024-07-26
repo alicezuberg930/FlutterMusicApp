@@ -21,9 +21,9 @@ class _PlaylistPageState extends State<PlaylistScreen> {
       ConcatenatingAudioSource(
         shuffleOrder: DefaultShuffleOrder(),
         children: [
-          for (int i = 0; i < widget.playlist.song.length; i++)
+          for (int i = 0; i < widget.playlist.songs.length; i++)
             AudioSource.uri(
-              Uri.parse('asset:///${widget.playlist.song[i].title}'),
+              Uri.parse('asset:///${widget.playlist.songs[i].title}'),
             )
         ],
       ),
@@ -79,10 +79,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                               audioPlayer.play();
                             },
                             iconSize: 30,
-                            icon: const Icon(
-                              Icons.play_circle,
-                              color: Colors.white,
-                            ),
+                            icon: const Icon(Icons.play_circle, color: Colors.white),
                           );
                         } else {
                           return IconButton(
@@ -90,10 +87,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                               audioPlayer.pause();
                             },
                             iconSize: 30,
-                            icon: const Icon(
-                              Icons.pause_circle,
-                              color: Colors.white,
-                            ),
+                            icon: const Icon(Icons.pause_circle, color: Colors.white),
                           );
                         }
                       } else {
@@ -105,7 +99,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                     padding: const EdgeInsets.only(left: 15),
                     width: MediaQuery.of(context).size.width * 0.7,
                     child: Text(
-                      widget.playlist.song[audioPlayer.currentIndex!].title!,
+                      widget.playlist.songs[audioPlayer.currentIndex!].title!,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -144,7 +138,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      widget.playlist.imageUrl,
+                      widget.playlist.thumbnailM!,
                       height: MediaQuery.of(context).size.height * 0.3,
                       width: MediaQuery.of(context).size.height * 0.3,
                       fit: BoxFit.cover,
@@ -152,7 +146,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                   ),
                   const SizedBox(height: 30),
                   Text(
-                    widget.playlist.title,
+                    widget.playlist.title!,
                     style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30),
@@ -248,7 +242,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                     padding: const EdgeInsets.only(top: 15),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.playlist.song.length,
+                    itemCount: widget.playlist.songs.length,
                     itemBuilder: (context, index) {
                       return Container(
                         decoration: BoxDecoration(
@@ -265,7 +259,7 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => SongScreen(
-                                  song: widget.playlist.song,
+                                  song: widget.playlist.songs,
                                   index: index,
                                 ),
                               ),
@@ -273,21 +267,14 @@ class _PlaylistPageState extends State<PlaylistScreen> {
                           },
                           leading: Text(
                             '${index + 1}',
-                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
                           ),
                           title: Text(
-                            widget.playlist.song[index].title!,
-                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            widget.playlist.songs[index].title!,
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text(widget.playlist.song[index].artistsNames!, style: Theme.of(context).textTheme.bodySmall!),
-                          trailing: const Icon(
-                            Icons.more_vert,
-                            color: Colors.white,
-                          ),
+                          subtitle: Text(widget.playlist.songs[index].artistsNames!, style: Theme.of(context).textTheme.bodySmall!),
+                          trailing: const Icon(Icons.more_vert, color: Colors.white),
                         ),
                       );
                     },

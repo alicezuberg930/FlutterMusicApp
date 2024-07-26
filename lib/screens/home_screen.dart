@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/song.dart';
-import 'package:flutter_music_app/screens/playlist_screen.dart';
+import 'package:flutter_music_app/models/top100.dart';
+import 'package:flutter_music_app/screens/new_release_screen.dart';
+import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/service/api_service.dart';
 import 'package:flutter_music_app/widgets/custom_appbar.dart';
+import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 
@@ -17,18 +19,25 @@ class HomeScreen extends StatefulWidget {
 class _HomePageState extends State<HomeScreen> {
   PageController pageController = PageController();
   int selectedIndex = 0;
-  List<Song> homeSongs = [];
-  // List<Playlist> playlists = Playlist.playlists;
+  List<Song> newReleaseSongs = [];
+  List<Top100> top100s = [];
   ApiService apiService = ApiService();
 
   @override
   void initState() {
     getHome();
+    getTop100Playlist();
     super.initState();
   }
 
   getHome() async {
-    homeSongs = await apiService.getHome();
+    List<Song> temp = await apiService.getHome();
+    setState(() => newReleaseSongs = temp);
+  }
+
+  getTop100Playlist() async {
+    List<Top100>? temp = await apiService.getTop100();
+    setState(() => top100s = temp!);
   }
 
   @override
@@ -51,17 +60,15 @@ class _HomePageState extends State<HomeScreen> {
         body: PageView(
           controller: pageController,
           onPageChanged: (value) {
-            setState(() {
-              selectedIndex = value;
-            });
+            setState(() => selectedIndex = value);
           },
           children: [
             SingleChildScrollView(
               child: Column(
                 children: [
                   searchWidget(),
-                  trendingMusic(homeSongs),
-                  // playlistWidget(),
+                  newReleaseSongsWidget(),
+                  top100PlaylistWidget(),
                 ],
               ),
             ),
@@ -71,147 +78,6 @@ class _HomePageState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  // playlistWidget() {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(20),
-  //     child: Column(
-  //       children: [
-  //         const SectionHeader(title: 'Playlist'),
-  //         ListView.builder(
-  //           physics: const NeverScrollableScrollPhysics(),
-  //           padding: const EdgeInsets.only(top: 15),
-  //           shrinkWrap: true,
-  //           itemCount: playlists.length,
-  //           itemBuilder: (context, index) {
-  //             return playlistCard(playlists[index]);
-  //           },
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  playlistCard(Playlist playlist) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PlaylistScreen(playlist: playlist),
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(color: Colors.deepPurple.shade800.withOpacity(0.8), borderRadius: BorderRadius.circular(15)),
-        height: 75,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                playlist.imageUrl,
-                height: 50,
-                width: 50,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    playlist.title,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    '${playlist.song.length} songs',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.play_circle,
-                color: Colors.white,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  trendingMusic(List<Song> songs) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, top: 15, bottom: 15),
-      child: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 15),
-            child: SectionHeader(title: 'Trending Music'),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: songs.length,
-              itemBuilder: (context, index) {
-                return SongCard(song: songs[index], isOnline: true);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  customNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: selectedIndex,
-      onTap: (value) {
-        pageController.animateToPage(
-          value,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-        );
-      },
-      type: BottomNavigationBarType.fixed,
-      showUnselectedLabels: false,
-      backgroundColor: Colors.deepPurple.shade800,
-      unselectedItemColor: Colors.white,
-      selectedItemColor: Colors.white,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: "Trang chủ",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_outline),
-          label: "Yêu thích",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.play_circle_fill_outlined),
-          label: "Phát",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          label: "Hồ sơ",
-        ),
-      ],
     );
   }
 
@@ -251,6 +117,98 @@ class _HomePageState extends State<HomeScreen> {
           )
         ],
       ),
+    );
+  }
+
+  newReleaseSongsWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewReleaseScreen(songs: newReleaseSongs),
+                ),
+              );
+            },
+            child: const SectionHeader(title: 'New release'),
+          ),
+          const SizedBox(height: 10),
+          ListView.separated(
+            separatorBuilder: (context, index) => const SizedBox(height: 15),
+            shrinkWrap: true,
+            itemCount: newReleaseSongs.length,
+            itemBuilder: (context, index) {
+              if (index <= 4) {
+                return SongCard(song: newReleaseSongs[index], isOnline: true);
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  top100PlaylistWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Top100PlaylistsScreen(top100s: top100s),
+                ),
+              );
+            },
+            child: const SectionHeader(title: 'Top 100'),
+          ),
+          const SizedBox(height: 10),
+          HorizontalCardList(playlists: top100s[0].items),
+        ],
+      ),
+    );
+  }
+
+  customNavigationBar() {
+    return BottomNavigationBar(
+      currentIndex: selectedIndex,
+      onTap: (value) {
+        pageController.animateToPage(
+          value,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+      },
+      type: BottomNavigationBarType.fixed,
+      showUnselectedLabels: false,
+      backgroundColor: Colors.deepPurple.shade800,
+      unselectedItemColor: Colors.white,
+      selectedItemColor: Colors.white,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: "Trang chủ",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.favorite_outline),
+          label: "Favorite",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.play_circle_fill_outlined),
+          label: "Local",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people_outline),
+          label: "Profile",
+        ),
+      ],
     );
   }
 }
