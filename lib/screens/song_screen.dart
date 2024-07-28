@@ -1,7 +1,6 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/services/api_service.dart';
@@ -39,19 +38,11 @@ class _SongPageState extends State<SongScreen> {
 
   @override
   void initState() {
-    initSong();
-    // songIndex = widget.index;
-    // audioPlayer.setAudioSource(
-    //   ConcatenatingAudioSource(
-    //     children: [
-    //       for (int i = 0; i < widget.song.length; i++)
-    //         AudioSource.uri(
-    //           Uri.parse('asset:///${widget.song[i].title}'),
-    //         )
-    //     ],
-    //   ),
-    //   initialIndex: songIndex,
-    // );
+    if (widget.song.length > 1) {
+      initPlaylist();
+    } else {
+      initSingleSong();
+    }
     super.initState();
   }
 
@@ -61,27 +52,29 @@ class _SongPageState extends State<SongScreen> {
     super.dispose();
   }
 
-  initSong() async {
-    Song? song;
-    if (widget.song[0].q128 == null) {
-      song = await apiService.getInfo(encodeId: widget.song[0].encodeId!);
-      if (song == null && context.mounted) {
-        UIHelpers.showSnackBar(context, Colors.red, "Bài hát chỉ dành cho tài khoản VIP");
-        return;
-      }
-    } else {
-      song = widget.song[0];
-    }
+  initSingleSong() async {
     audioPlayer.setAudioSource(
       AudioSource.uri(
-        Uri.parse(song!.q128!),
+        Uri.parse(widget.song[0].q128!),
         tag: MediaItem(
-          id: song.encodeId!,
+          id: widget.song[0].encodeId!,
           album: "No album",
-          title: song.title!,
-          artist: song.artistsNames,
-          artUri: song.thumbnail != null ? Uri.parse(song.thumbnail!) : null,
+          title: widget.song[0].title!,
+          artist: widget.song[0].artistsNames,
+          artUri: widget.song[0].thumbnail != null ? Uri.parse(widget.song[0].thumbnail!) : null,
         ),
+      ),
+      initialIndex: songIndex,
+    );
+  }
+
+  initPlaylist() async {
+    songIndex = widget.index;
+    audioPlayer.setAudioSource(
+      ConcatenatingAudioSource(
+        children: [
+          for (Song song in widget.song) AudioSource.uri(Uri.parse(song.q128!)),
+        ],
       ),
       initialIndex: songIndex,
     );
@@ -203,7 +196,7 @@ class _SongPageState extends State<SongScreen> {
               if (widget.isOnline == true) ...[
                 IconButton(
                   onPressed: () async {
-                    if (song.q128 != null) await Utils.downloadFile(song.q128!, "${song.artistsNames} - ${song.title!}.mp3");
+                    await Utils.downloadFile(song.q128!, "${song.artistsNames} - ${song.title!}.mp3");
                   },
                   iconSize: 30,
                   color: Colors.white,

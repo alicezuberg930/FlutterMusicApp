@@ -1,11 +1,9 @@
 // ignore_for_file: must_be_immutable
-
-import 'dart:isolate';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/screens/song_screen.dart';
+import 'package:flutter_music_app/services/api_service.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class SongCard extends StatelessWidget {
@@ -13,24 +11,26 @@ class SongCard extends StatelessWidget {
   final Song song;
   SongCard({super.key, required this.song, this.isOnline});
 
+  ApiService apiService = ApiService();
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        showModalBottomSheet(
-          useSafeArea: true,
-          context: context,
-          isScrollControlled: true,
-          builder: (context) {
-            return SongScreen(song: [song], index: 0, isOnline: isOnline);
-          },
-        );
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => SongScreen(song: [song], index: 0, isOnline: isOnline),
-        //   ),
-        // );
+      onTap: () async {
+        if (isOnline == true) {
+          String? stream = await apiService.getStreaming(encodeId: song.encodeId!);
+          song.q128 = stream;
+        }
+        if (context.mounted) {
+          showModalBottomSheet(
+            useSafeArea: true,
+            context: context,
+            isScrollControlled: true,
+            builder: (context) {
+              return SongScreen(song: [song], index: 0, isOnline: isOnline);
+            },
+          );
+        }
       },
       child: Row(
         children: [
@@ -87,7 +87,9 @@ class SongCard extends StatelessWidget {
                       if (isOnline == true) ...[
                         ListTile(
                           onTap: () async {
-                            await Utils.downloadFile(song.q128 ?? "", "${song.artistsNames} - ${song.title!}.mp3");
+                            String? stream = await apiService.getStreaming(encodeId: song.encodeId!);
+                            song.q128 = stream;
+                            await Utils.downloadFile(song.q128!, "${song.artistsNames} - ${song.title!}.mp3");
                             if (context.mounted) Navigator.pop(context);
                           },
                           leading: const Icon(Icons.download, color: Colors.black),

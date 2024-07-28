@@ -28,7 +28,6 @@ class _HomePageState extends State<HomeScreen> {
   void initState() {
     getHome();
     getTop100Playlist();
-    Future.delayed(Duration(seconds: 3));
     super.initState();
   }
 

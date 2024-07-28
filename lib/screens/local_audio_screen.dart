@@ -15,17 +15,9 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: RefreshIndicator(
-        onRefresh: () async {
-          await audioQuery.querySongs(
-            sortType: null,
-            orderType: OrderType.ASC_OR_SMALLER,
-            uriType: UriType.EXTERNAL,
-            ignoreCase: true,
-          );
-        },
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         child: Column(
           children: [
             Text(
@@ -34,7 +26,6 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
             ),
             FutureBuilder(
               future: audioQuery.querySongs(
-                sortType: null,
                 orderType: OrderType.ASC_OR_SMALLER,
                 uriType: UriType.EXTERNAL,
                 ignoreCase: true,
@@ -53,8 +44,10 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
                   }
                 }
                 return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
                   separatorBuilder: (context, index) => const SizedBox(height: 15),
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     Song song = Song(
@@ -66,16 +59,6 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
                     return SongCard(song: song, isOnline: false);
                   },
                 );
-                // if (snapshot.data == null) {
-                //   return const CircularProgressIndicator(color: Colors.purple);
-                // } else if (snapshot.data!.isEmpty) {
-                //   return Center(
-                //     child: Text(
-                //       "No songs found on device",
-                //       style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                //     ),
-                //   );
-                // }
               },
             ),
           ],

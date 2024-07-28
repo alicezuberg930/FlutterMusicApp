@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/screens/home_screen.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
@@ -20,6 +21,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: Constants.rootScaffoldMessengerKey,
       home: const HomeScreen(),
       title: "Flutter music app",
       theme: ThemeData(

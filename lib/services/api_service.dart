@@ -52,7 +52,19 @@ class ApiService extends HttpService {
       final response = await get("/page/get/playlist", queryParameters: {'id': encodeId});
       return Playlist.fromJson(response.data);
     } catch (e) {
-      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> getStreaming({required String encodeId}) async {
+    try {
+      final response = await get("/song/get/streaming", queryParameters: {'id': encodeId});
+      if (response.data['err'] == null) {
+        return response.data['128'];
+      } else {
+        return null;
+      }
+    } catch (e) {
       return null;
     }
   }
