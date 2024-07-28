@@ -1,8 +1,12 @@
 // ignore_for_file: must_be_immutable
 
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/screens/song_screen.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class SongCard extends StatelessWidget {
   bool? isOnline;
@@ -13,24 +17,40 @@ class SongCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SongScreen(song: [song], index: 0, isOnline: isOnline),
-          ),
+        showModalBottomSheet(
+          useSafeArea: true,
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return SongScreen(song: [song], index: 0, isOnline: isOnline);
+          },
         );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => SongScreen(song: [song], index: 0, isOnline: isOnline),
+        //   ),
+        // );
       },
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image(
-              image: Image.network(song.thumbnail!).image,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            ),
-          ),
+          isOnline == true
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image(
+                    image: Image.network(song.thumbnail!).image,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : QueryArtworkWidget(
+                  artworkBorder: BorderRadius.circular(10),
+                  id: int.parse(song.encodeId!),
+                  type: ArtworkType.AUDIO,
+                  quality: 100,
+                  artworkQuality: FilterQuality.high,
+                ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -64,12 +84,20 @@ class SongCard extends StatelessWidget {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (isOnline == true) ...[
+                        ListTile(
+                          onTap: () async {
+                            await Utils.downloadFile(song.q128 ?? "", "${song.artistsNames} - ${song.title!}.mp3");
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                          leading: const Icon(Icons.download, color: Colors.black),
+                          title: const Text("Download", style: TextStyle(color: Colors.black)),
+                        )
+                      ],
                       ListTile(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        leading: const Icon(Icons.download, color: Colors.black),
-                        title: const Text("Download", style: TextStyle(color: Colors.black)),
+                        onTap: () {},
+                        leading: const Icon(Icons.search, color: Colors.black),
+                        title: const Text("Search", style: TextStyle(color: Colors.black)),
                       )
                     ],
                   );

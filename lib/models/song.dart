@@ -9,6 +9,7 @@ class Song {
   String? thumbnail;
   String? link;
   int? duration;
+  int? releaseDate;
   List<dynamic>? genreIds;
   bool? hasLyric;
   String? q128;
@@ -22,6 +23,7 @@ class Song {
     this.thumbnail,
     this.link,
     this.duration,
+    this.releaseDate,
     this.genreIds,
     this.hasLyric,
     this.q128,
@@ -39,6 +41,7 @@ class Song {
       thumbnail: json['thumbnail'],
       link: json['link'],
       duration: json['duration'],
+      releaseDate: json['releaseDate'],
       genreIds: json['genreIds'],
       hasLyric: json['hasLyric'],
       q128: json['streaming'] == null ? null : json['streaming']['128'],

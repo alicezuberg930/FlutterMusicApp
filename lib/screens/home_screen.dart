@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/top100.dart';
+import 'package:flutter_music_app/screens/local_audio_screen.dart';
 import 'package:flutter_music_app/screens/new_release_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
-import 'package:flutter_music_app/service/api_service.dart';
+import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/custom_appbar.dart';
 import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomeScreen> {
   void initState() {
     getHome();
     getTop100Playlist();
+    Future.delayed(Duration(seconds: 3));
     super.initState();
   }
 
@@ -37,7 +39,7 @@ class _HomePageState extends State<HomeScreen> {
 
   getTop100Playlist() async {
     List<Top100>? temp = await apiService.getTop100();
-    setState(() => top100s = temp!);
+    setState(() => top100s = temp);
   }
 
   @override
@@ -73,7 +75,7 @@ class _HomePageState extends State<HomeScreen> {
               ),
             ),
             const Text("Favorite"),
-            const Text("Nhạc trên máy"),
+            const LocalAudioScreen(),
             const Text("Profile"),
           ],
         ),
@@ -83,7 +85,7 @@ class _HomePageState extends State<HomeScreen> {
 
   searchWidget() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -114,7 +116,8 @@ class _HomePageState extends State<HomeScreen> {
               ),
               labelStyle: const TextStyle(color: Colors.grey),
             ),
-          )
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -137,17 +140,19 @@ class _HomePageState extends State<HomeScreen> {
             child: const SectionHeader(title: 'New release'),
           ),
           const SizedBox(height: 10),
-          ListView.separated(
-            separatorBuilder: (context, index) => const SizedBox(height: 15),
-            shrinkWrap: true,
-            itemCount: newReleaseSongs.length,
-            itemBuilder: (context, index) {
-              if (index <= 4) {
-                return SongCard(song: newReleaseSongs[index], isOnline: true);
-              }
-              return null;
-            },
-          ),
+          newReleaseSongs.isNotEmpty
+              ? ListView.separated(
+                  separatorBuilder: (context, index) => const SizedBox(height: 15),
+                  shrinkWrap: true,
+                  itemCount: newReleaseSongs.length,
+                  itemBuilder: (context, index) {
+                    if (index <= 4) {
+                      return SongCard(song: newReleaseSongs[index], isOnline: true);
+                    }
+                    return null;
+                  },
+                )
+              : const CircularProgressIndicator(color: Colors.purple),
         ],
       ),
     );
@@ -170,7 +175,7 @@ class _HomePageState extends State<HomeScreen> {
             child: const SectionHeader(title: 'Top 100'),
           ),
           const SizedBox(height: 10),
-          HorizontalCardList(playlists: top100s[0].items),
+          top100s.isNotEmpty ? HorizontalCardList(playlists: top100s[0].items) : const CircularProgressIndicator(color: Colors.purple),
         ],
       ),
     );

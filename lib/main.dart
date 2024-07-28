@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_music_app/screens/home_screen.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
+  await FlutterDownloader.initialize(debug: false);
   runApp(const MainApp());
 }
 

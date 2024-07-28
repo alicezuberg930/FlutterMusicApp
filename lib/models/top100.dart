@@ -9,6 +9,7 @@ class Top100 {
   factory Top100.fromJson(Map<String, dynamic> json) {
     List<Playlist> tempPlaylists = [];
     if (json["items"].isNotEmpty) json['items'].forEach((item) => tempPlaylists.add(Playlist.fromJson(item)));
+
     return Top100(
       sectionType: json['sectionType'],
       title: json['title'],

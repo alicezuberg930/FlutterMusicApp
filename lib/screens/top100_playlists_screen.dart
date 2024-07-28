@@ -14,43 +14,30 @@ class Top100PlaylistsScreen extends StatefulWidget {
 class _Top100PlaylistsScreenState extends State<Top100PlaylistsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.deepPurple.shade800.withOpacity(0.8),
-            Colors.deepPurple.shade200.withOpacity(0.8),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.deepPurple.shade800.withOpacity(0.8),
+        elevation: 0,
+        title: const Text("Top 100s"),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: const Text("Top 100s"),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: ListView.separated(
-            separatorBuilder: (context, index) => const SizedBox(height: 10),
-            shrinkWrap: true,
-            itemCount: widget.top100s.length,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    child: SectionHeader(title: widget.top100s[index].title!, action: ''),
-                  ),
-                  const SizedBox(height: 10),
-                  HorizontalCardList(playlists: widget.top100s[index].items),
-                ],
-              );
-            },
-          ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+        child: ListView.separated(
+          separatorBuilder: (context, index) => const SizedBox(height: 10),
+          shrinkWrap: true,
+          itemCount: widget.top100s.length,
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {},
+                  child: SectionHeader(title: widget.top100s[index].title!, action: '', color: Colors.black),
+                ),
+                const SizedBox(height: 10),
+                HorizontalCardList(playlists: widget.top100s[index].items),
+              ],
+            );
+          },
         ),
       ),
     );

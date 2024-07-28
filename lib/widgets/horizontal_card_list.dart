@@ -20,7 +20,7 @@ class HorizontalCardList extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PlayListDetailsScreen(playlist: playlists[index]),
+                  builder: (context) => PlayListDetailsScreen(encodeId: playlists[index].encodeId!),
                 ),
               );
             },
