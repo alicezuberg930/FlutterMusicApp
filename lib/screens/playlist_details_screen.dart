@@ -53,13 +53,9 @@ class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
     return Scaffold(
       body: SafeArea(
         child: playlist == null
-            ? const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              )
+            ? const Center(child: CircularProgressIndicator(color: Colors.purple))
             : playlist!.songs.isEmpty
-                ? const Center(
-                    child: Text("No songs found"),
-                  )
+                ? const Center(child: Text("No songs found"))
                 : SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),

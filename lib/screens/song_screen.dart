@@ -9,6 +9,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
+import 'package:share_plus/share_plus.dart';
+// import 'package:share_plus/share_plus.dart';
 
 class SongScreen extends StatefulWidget {
   final int index;
@@ -188,7 +190,9 @@ class _SongPageState extends State<SongScreen> {
                 icon: const Icon(Icons.thumb_up),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await Share.share("https://zingmp3.vn${song.link}", subject: "Look at this song");
+                },
                 iconSize: 30,
                 color: Colors.white,
                 icon: const Icon(Icons.share),
@@ -203,12 +207,6 @@ class _SongPageState extends State<SongScreen> {
                   icon: const Icon(Icons.download),
                 )
               ]
-              // IconButton(
-              //   onPressed: () {},
-              //   iconSize: 30,
-              //   color: Colors.white,
-              //   icon: const Icon(Icons.settings),
-              // )
             ],
           )
         ],

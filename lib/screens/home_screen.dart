@@ -3,9 +3,9 @@ import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/top100.dart';
 import 'package:flutter_music_app/screens/local_audio_screen.dart';
 import 'package:flutter_music_app/screens/new_release_screen.dart';
+import 'package:flutter_music_app/screens/search_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
-import 'package:flutter_music_app/widgets/custom_appbar.dart';
 import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
@@ -56,7 +56,32 @@ class _HomePageState extends State<HomeScreen> {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const CustomAppbar(),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: const Icon(Icons.grid_view_rounded),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchScreen(),
+                  ),
+                );
+              },
+              child: const Icon(Icons.search),
+            ),
+            const SizedBox(width: 15),
+            const CircleAvatar(
+              radius: 20,
+              backgroundImage: NetworkImage(
+                'https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg',
+              ),
+            ),
+            const SizedBox(width: 15),
+          ],
+        ),
         bottomNavigationBar: customNavigationBar(),
         body: PageView(
           controller: pageController,
@@ -67,7 +92,6 @@ class _HomePageState extends State<HomeScreen> {
             SingleChildScrollView(
               child: Column(
                 children: [
-                  searchWidget(),
                   newReleaseSongsWidget(),
                   top100PlaylistWidget(),
                 ],
@@ -78,46 +102,6 @@ class _HomePageState extends State<HomeScreen> {
             const Text("Profile"),
           ],
         ),
-      ),
-    );
-  }
-
-  searchWidget() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome',
-            style: Theme.of(context).textTheme.bodyLarge!,
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Enjoy your favorite music',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            onFieldSubmitted: (value) async {
-              await apiService.getHome();
-              // print(value);
-            },
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.purple[200],
-              hintText: "Tìm kiếm",
-              hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
-              prefixIcon: const Icon(Icons.search, color: Colors.white),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-              labelStyle: const TextStyle(color: Colors.grey),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
       ),
     );
   }
@@ -198,7 +182,7 @@ class _HomePageState extends State<HomeScreen> {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: "Trang chủ",
+          label: "Home",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.favorite_outline),

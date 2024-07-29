@@ -26,9 +26,9 @@ class Playlist {
 
   factory Playlist.fromJson(Map<String, dynamic> json) {
     List<Artist> tempArtists = [];
-    if (json['artists'].isNotEmpty) json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
     List<Song> tempSongs = [];
-    if (json.containsKey("song") && json['song']['items'].isNotEmpty) json['song']['items'].forEach((song) => tempSongs.add(Song.fromJson(song)));
+    if (json['artists'].isNotEmpty) json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
+    if (json["song"] != null && json['song']['items'].isNotEmpty) json['song']['items'].forEach((song) => tempSongs.add(Song.fromJson(song)));
 
     return Playlist(
       encodeId: json['encodeId'],

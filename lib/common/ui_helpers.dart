@@ -15,6 +15,5 @@ class UIHelpers {
         ),
       ),
     );
-    // ScaffoldMessenger.of(context).showSnackBar();
   }
 }

@@ -50,6 +50,10 @@ class SongCard extends StatelessWidget {
                   type: ArtworkType.AUDIO,
                   quality: 100,
                   artworkQuality: FilterQuality.high,
+                  nullArtworkWidget: Container(
+                    decoration: BoxDecoration(color: Colors.purple[50], borderRadius: BorderRadius.circular(10)),
+                    child: const Icon(Icons.music_note, color: Colors.deepPurpleAccent, size: 50),
+                  ),
                 ),
           const SizedBox(width: 10),
           Expanded(

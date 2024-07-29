@@ -1,12 +1,14 @@
 import 'package:flutter_music_app/models/playlist.dart';
+import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/top100.dart';
 import 'package:flutter_music_app/services/http_service.dart';
 
 class ApiService extends HttpService {
-  Future search({required String query}) async {
+  Future<Search> search({required String query}) async {
     final response = await get("/search/multi", queryParameters: {"search": query});
-    return response.data;
+    // print(response.data['songs'][0]['artists'][0]);
+    return Search.fromJson(response.data);
   }
 
   Future<Song?> getInfo({required String encodeId}) async {
@@ -18,7 +20,7 @@ class ApiService extends HttpService {
         return Song.fromJson(response.data);
       }
     } catch (e) {
-      print(e);
+      // print(e);
       return null;
     }
   }
@@ -30,7 +32,7 @@ class ApiService extends HttpService {
       response.data['items'][2]['items']['all'].forEach((song) => songs.add(Song.fromJson(song)));
       return songs;
     } catch (e) {
-      print(e);
+      // print(e);
       return [];
     }
   }
@@ -42,7 +44,7 @@ class ApiService extends HttpService {
       response.data.forEach((item) => top100s.add(Top100.fromJson(item)));
       return top100s;
     } catch (e) {
-      print(e);
+      // print(e);
       return [];
     }
   }
@@ -50,6 +52,7 @@ class ApiService extends HttpService {
   Future<Playlist?> getPlaylist({required String encodeId}) async {
     try {
       final response = await get("/page/get/playlist", queryParameters: {'id': encodeId});
+
       return Playlist.fromJson(response.data);
     } catch (e) {
       return null;
