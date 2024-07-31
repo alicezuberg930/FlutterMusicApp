@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/top100.dart';
 import 'package:flutter_music_app/screens/local_audio_screen.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_music_app/screens/search_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
+import 'package:flutter_music_app/widgets/minimize_current_song.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 
@@ -100,6 +102,7 @@ class _HomePageState extends State<HomeScreen> {
             const Text("Profile"),
           ],
         ),
+        bottomSheet: Constants.audioPlayer.currentIndex != null ? const MinimizeCurrentSong() : null,
       ),
     );
   }

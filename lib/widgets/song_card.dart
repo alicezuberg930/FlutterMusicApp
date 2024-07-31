@@ -19,13 +19,7 @@ class SongCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        if (isOnline == true) {
-          String? stream;
-          for (Song song in songs!) {
-            stream = await apiService.getStreaming(encodeId: song.encodeId!);
-            song.q128 = stream;
-          }
-        }
+        if (isOnline!) songs![index].q128 = await apiService.getStreaming(encodeId: songs![index].encodeId!);
         if (context.mounted) {
           // Navigator.push(
           //   context,

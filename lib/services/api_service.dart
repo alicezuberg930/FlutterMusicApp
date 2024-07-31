@@ -1,3 +1,4 @@
+import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/models/song.dart';
@@ -64,12 +65,14 @@ class ApiService extends HttpService {
   Future<String?> getStreaming({required String encodeId}) async {
     try {
       final response = await get("/song/get/streaming", queryParameters: {'id': encodeId});
-      if (response.data['err'] == null) {
-        return response.data["data"]['128'];
+      if (response.data['err'] == 0) {
+        return response.data['data']['128'];
       } else {
+        UIHelpers.showSnackBar(message: response.data['msg']);
         return null;
       }
     } catch (e) {
+      UIHelpers.showSnackBar(message: e.toString());
       return null;
     }
   }

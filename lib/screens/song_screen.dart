@@ -1,4 +1,6 @@
 // ignore_for_file: must_be_immutable
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/utils.dart';
@@ -26,36 +28,48 @@ class SongScreen extends StatefulWidget {
 class _SongPageState extends State<SongScreen> {
   int songIndex = 0;
   ApiService apiService = ApiService();
-  Stream<SeekBarData> get seekBarDataStream => rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
-        Constants.audioPlayer.positionStream,
-        Constants.audioPlayer.durationStream,
-        (Duration position, Duration? duration) {
-          return SeekBarData(
-            position: position,
-            duration: duration ?? Duration.zero,
-          );
-        },
+  Stream<SeekBarData> seekBarDataStream = rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
+    Constants.audioPlayer.positionStream,
+    Constants.audioPlayer.durationStream,
+    (Duration position, Duration? duration) {
+      return SeekBarData(
+        position: position,
+        duration: duration ?? Duration.zero,
       );
+    },
+  );
+  late StreamSubscription<SequenceState?> streamSubscription;
+  String? currentQ128;
 
   @override
   void initState() {
-    initSongs();
+    songIndex = widget.index;
+    if ((Constants.audioPlayer.audioSource != null && Constants.audioPlayer.currentIndex != songIndex) || Constants.audioPlayer.audioSource == null) {
+      initSongs();
+    }
+    streamSubscription = Constants.audioPlayer.sequenceStateStream.listen((event) {
+      if (event != null && event.currentIndex > songIndex) {
+        setState(() => songIndex += 1);
+        if (widget.isOnline == true) setCurrentAudioSource();
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
+    streamSubscription.cancel();
     super.dispose();
   }
 
-  initSongs() async {
-    songIndex = widget.index;
+  setCurrentAudioSource() async {
+    currentQ128 = await apiService.getStreaming(encodeId: widget.song[songIndex].encodeId!);
     await Constants.audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         children: [
           for (Song song in widget.song)
             AudioSource.uri(
-              Uri.parse(song.q128!),
+              Uri.parse(currentQ128 ?? Constants.defaultAudio),
               tag: MediaItem(
                 id: song.encodeId!,
                 album: "No album",
@@ -68,13 +82,27 @@ class _SongPageState extends State<SongScreen> {
       ),
       initialIndex: songIndex,
     );
-    Constants.audioPlayer.sequenceStateStream.listen((event) {
-      if (event != null && event.currentIndex != songIndex) {
-        if (Constants.audioPlayer.hasNext) {
-          setState(() => songIndex += 1);
-        }
-      }
-    });
+  }
+
+  initSongs() async {
+    await Constants.audioPlayer.setAudioSource(
+      ConcatenatingAudioSource(
+        children: [
+          for (Song song in widget.song)
+            AudioSource.uri(
+              Uri.parse(song.q128 ?? ""),
+              tag: MediaItem(
+                id: song.encodeId!,
+                album: "No album",
+                title: song.title!,
+                artist: song.artistsNames,
+                artUri: song.thumbnail != null ? Uri.parse(song.thumbnail!) : null,
+              ),
+            ),
+        ],
+      ),
+      initialIndex: songIndex,
+    );
   }
 
   @override
@@ -230,6 +258,7 @@ class _SongPageState extends State<SongScreen> {
                 if (audioPlayer.hasPrevious) {
                   audioPlayer.seekToPrevious();
                   setState(() => songIndex -= 1);
+                  if (widget.isOnline == true) setCurrentAudioSource();
                 }
               },
               icon: const Icon(Icons.skip_previous),
@@ -289,6 +318,7 @@ class _SongPageState extends State<SongScreen> {
                 if (audioPlayer.hasNext) {
                   audioPlayer.seekToNext();
                   setState(() => songIndex += 1);
+                  if (widget.isOnline == true) setCurrentAudioSource();
                 }
               },
               icon: const Icon(Icons.skip_next),
