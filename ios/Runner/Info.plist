@@ -47,5 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app use speech recognition for searching with microphone</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app need microphone permission for searching with speech to text</string>
 </dict>
 </plist>

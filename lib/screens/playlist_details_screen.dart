@@ -175,7 +175,7 @@ class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
                             shrinkWrap: true,
                             itemCount: playlist!.songs.length,
                             itemBuilder: (context, index) {
-                              return SongCard(song: playlist!.songs[index], isOnline: true);
+                              return SongCard(isOnline: true, index: index, songs: playlist!.songs);
                             },
                           ),
                         ],

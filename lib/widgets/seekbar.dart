@@ -38,8 +38,8 @@ class _SeekBarState extends State<SeekBar> {
             data: SliderTheme.of(context).copyWith(
                 trackHeight: 4,
                 thumbShape: const RoundSliderThumbShape(
-                  disabledThumbRadius: 4,
-                  enabledThumbRadius: 4,
+                  disabledThumbRadius: 6,
+                  enabledThumbRadius: 6,
                 ),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
                 activeTrackColor: Colors.white.withOpacity(0.6),

@@ -22,9 +22,9 @@ class Search {
     List<Playlist> tempPlaylists = [];
     List<Video> tempVideos = [];
 
-    if (json['songs'].isNotEmpty) json['songs'].forEach((song) => tempSongs.add(Song.fromJson(song)));
+    if (json['songs'] != null && json['songs'].isNotEmpty) json['songs'].forEach((song) => tempSongs.add(Song.fromJson(song)));
     if (json['artists'] != null && json['artists'].isNotEmpty) json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
-    if (json['playlists'].isNotEmpty) json['playlists'].forEach((playlist) => tempPlaylists.add(Playlist.fromJson(playlist)));
+    if (json['playlists'] != null && json['playlists'].isNotEmpty) json['playlists'].forEach((playlist) => tempPlaylists.add(Playlist.fromJson(playlist)));
     if (json['videos'] != null && json['videos'].isNotEmpty) json['videos'].forEach((video) => tempVideos.add(Video.fromJson(video)));
 
     return Search(

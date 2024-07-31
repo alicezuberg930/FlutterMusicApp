@@ -1,8 +1,9 @@
 // ignore_for_file: must_be_immutable
-
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
+import 'package:flutter_music_app/screens/artist_details_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/seekbar.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,14 +11,13 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 import 'package:share_plus/share_plus.dart';
-// import 'package:share_plus/share_plus.dart';
 
 class SongScreen extends StatefulWidget {
   final int index;
   final List<Song> song;
   bool? isOnline;
-  AudioSource? audioSource;
-  SongScreen({Key? key, required this.song, required this.index, this.isOnline, this.audioSource}) : super(key: key);
+
+  SongScreen({Key? key, required this.song, required this.index, this.isOnline}) : super(key: key);
 
   @override
   State<SongScreen> createState() => _SongPageState();
@@ -25,11 +25,10 @@ class SongScreen extends StatefulWidget {
 
 class _SongPageState extends State<SongScreen> {
   int songIndex = 0;
-  AudioPlayer audioPlayer = AudioPlayer();
   ApiService apiService = ApiService();
   Stream<SeekBarData> get seekBarDataStream => rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
-        audioPlayer.positionStream,
-        audioPlayer.durationStream,
+        Constants.audioPlayer.positionStream,
+        Constants.audioPlayer.durationStream,
         (Duration position, Duration? duration) {
           return SeekBarData(
             position: position,
@@ -40,46 +39,42 @@ class _SongPageState extends State<SongScreen> {
 
   @override
   void initState() {
-    if (widget.song.length > 1) {
-      initPlaylist();
-    } else {
-      initSingleSong();
-    }
+    initSongs();
     super.initState();
   }
 
   @override
   void dispose() {
-    audioPlayer.dispose();
     super.dispose();
   }
 
-  initSingleSong() async {
-    audioPlayer.setAudioSource(
-      AudioSource.uri(
-        Uri.parse(widget.song[0].q128!),
-        tag: MediaItem(
-          id: widget.song[0].encodeId!,
-          album: "No album",
-          title: widget.song[0].title!,
-          artist: widget.song[0].artistsNames,
-          artUri: widget.song[0].thumbnail != null ? Uri.parse(widget.song[0].thumbnail!) : null,
-        ),
-      ),
-      initialIndex: songIndex,
-    );
-  }
-
-  initPlaylist() async {
+  initSongs() async {
     songIndex = widget.index;
-    audioPlayer.setAudioSource(
+    await Constants.audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         children: [
-          for (Song song in widget.song) AudioSource.uri(Uri.parse(song.q128!)),
+          for (Song song in widget.song)
+            AudioSource.uri(
+              Uri.parse(song.q128!),
+              tag: MediaItem(
+                id: song.encodeId!,
+                album: "No album",
+                title: song.title!,
+                artist: song.artistsNames,
+                artUri: song.thumbnail != null ? Uri.parse(song.thumbnail!) : null,
+              ),
+            ),
         ],
       ),
       initialIndex: songIndex,
     );
+    Constants.audioPlayer.sequenceStateStream.listen((event) {
+      if (event != null && event.currentIndex != songIndex) {
+        if (Constants.audioPlayer.hasNext) {
+          setState(() => songIndex += 1);
+        }
+      }
+    });
   }
 
   @override
@@ -171,20 +166,27 @@ class _SongPageState extends State<SongScreen> {
               return SeekBar(
                 position: positionData?.position ?? Duration.zero,
                 duration: positionData?.duration ?? Duration.zero,
-                onchangeEnd: audioPlayer.seek,
+                onchangeEnd: Constants.audioPlayer.seek,
               );
             },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [playerButton(audioPlayer)],
+            children: [playerButton(Constants.audioPlayer)],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ArtistDetailsScreen(),
+                    ),
+                  );
+                },
                 iconSize: 30,
                 color: Colors.white,
                 icon: const Icon(Icons.thumb_up),
@@ -225,8 +227,10 @@ class _SongPageState extends State<SongScreen> {
               iconSize: 60,
               color: audioPlayer.hasPrevious ? Colors.blue.shade400 : Colors.grey,
               onPressed: () {
-                if (audioPlayer.hasPrevious) audioPlayer.seekToPrevious();
-                if (songIndex > 0) setState(() => songIndex -= 1);
+                if (audioPlayer.hasPrevious) {
+                  audioPlayer.seekToPrevious();
+                  setState(() => songIndex -= 1);
+                }
               },
               icon: const Icon(Icons.skip_previous),
             );
@@ -282,8 +286,10 @@ class _SongPageState extends State<SongScreen> {
               iconSize: 60,
               color: audioPlayer.hasNext ? Colors.blue.shade400 : Colors.grey,
               onPressed: () {
-                if (audioPlayer.hasNext) audioPlayer.seekToNext();
-                if (songIndex < widget.song.length - 1) setState(() => songIndex += 1);
+                if (audioPlayer.hasNext) {
+                  audioPlayer.seekToNext();
+                  setState(() => songIndex += 1);
+                }
               },
               icon: const Icon(Icons.skip_next),
             );

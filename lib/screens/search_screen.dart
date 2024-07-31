@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_music_app/common/ui_helpers.dart';
+import 'package:flutter_music_app/common/debouncer.dart';
 import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/screens/playlist_details_screen.dart';
+import 'package:flutter_music_app/screens/speech_to_text_scree.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 
@@ -23,6 +24,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   ];
   TabController? tabController;
   TextEditingController searchController = TextEditingController();
+  bool isSearching = false;
+  bool isListening = false;
+  Debouncer debouncer = Debouncer(milliseconds: 1500);
 
   @override
   void initState() {
@@ -34,15 +38,20 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   void dispose() {
     tabController?.dispose();
     searchController.dispose();
+    debouncer.dispose();
     super.dispose();
   }
 
   fetchSearchData() {
-    if (searchController.text.length > 3) {
+    debouncer.run(() {
+      setState(() => isSearching = true);
       apiService.search(query: searchController.text).then((value) {
-        setState(() => searchData = value);
+        setState(() {
+          searchData = value;
+          isSearching = false;
+        });
       });
-    }
+    });
   }
 
   @override
@@ -52,10 +61,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.white,
         title: TextFormField(
-          onChanged: (value) async {
-            await Future.delayed(const Duration(seconds: 4));
-            fetchSearchData();
-          },
+          onChanged: (value) => fetchSearchData(),
           controller: searchController,
           style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
           decoration: InputDecoration(
@@ -66,7 +72,28 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
             prefixIcon: const Icon(Icons.search, color: Colors.black),
             suffixIcon: GestureDetector(
-              onTap: () => UIHelpers.showSnackBar(message: "to be implemented in the future"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SpeechToTextScreen(),
+                  ),
+                ).then(
+                  (value) {
+                    if (value != null) {
+                      searchController.clear();
+                      searchController.text = value;
+                      setState(() => isSearching = true);
+                      apiService.search(query: searchController.text).then((value) {
+                        setState(() {
+                          searchData = value;
+                          isSearching = false;
+                        });
+                      });
+                    }
+                  },
+                );
+              },
               child: const Icon(Icons.mic, color: Colors.blue),
             ),
             border: OutlineInputBorder(
@@ -92,15 +119,40 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           searchedPlaylistsWidget(),
           searchedArtistsWidget(),
           searchedMVWidgets(),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //   children: [
+          //     Text(
+          //       isListening ? searchController.text : "Press on the mic",
+          //       style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.black),
+          //     ),
+          //     IconButton(
+          //       splashRadius: 60,
+          //       splashColor: Colors.blue,
+          //       color: Colors.blue[400],
+          //       onPressed: () {
+          //         if (speechToText.isListening) {
+          //           speechToText.stop();
+          //           setState(() => isListening = false);
+          //         } else {
+          //           startListening();
+          //           setState(() => isListening = true);
+          //         }
+          //       },
+          //       iconSize: 60,
+          //       icon: Icon(isListening ? Icons.stop_circle : Icons.mic),
+          //     ),
+          //   ],
+          // )
         ],
       ),
     );
   }
 
   searchedSongsWidget() {
-    return searchData == null
+    return isSearching
         ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-        : searchData!.songs.isEmpty
+        : searchData == null || searchData!.songs.isEmpty
             ? const Center(child: Text("No songs found", style: TextStyle(color: Colors.black)))
             : ListView.separated(
                 padding: const EdgeInsets.all(15),
@@ -108,15 +160,15 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 shrinkWrap: true,
                 itemCount: searchData!.songs.length,
                 itemBuilder: (context, index) {
-                  return SongCard(song: searchData!.songs[index], isOnline: true);
+                  return SongCard(isOnline: true, index: index, songs: searchData!.songs);
                 },
               );
   }
 
   searchedPlaylistsWidget() {
-    return searchData == null
+    return isSearching
         ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-        : searchData!.playlists.isEmpty
+        : searchData == null || searchData!.playlists.isEmpty
             ? const Center(child: Text("No playlists found", style: TextStyle(color: Colors.black)))
             : ListView.separated(
                 padding: const EdgeInsets.all(15),
@@ -181,9 +233,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   searchedArtistsWidget() {
-    return searchData == null
+    return isSearching
         ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-        : searchData!.artists.isEmpty
+        : searchData == null || searchData!.artists.isEmpty
             ? const Center(child: Text("No artists found", style: TextStyle(color: Colors.black)))
             : ListView.separated(
                 padding: const EdgeInsets.all(15),
@@ -246,9 +298,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   searchedMVWidgets() {
-    return searchData == null
+    return isSearching
         ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-        : searchData!.videos.isEmpty
+        : searchData == null || searchData!.videos.isEmpty
             ? const Center(child: Text("No music videos found", style: TextStyle(color: Colors.black)))
             : ListView.separated(
                 padding: const EdgeInsets.all(15),

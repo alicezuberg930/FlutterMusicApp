@@ -8,8 +8,10 @@ import 'package:on_audio_query/on_audio_query.dart';
 
 class SongCard extends StatelessWidget {
   bool? isOnline;
-  final Song song;
-  SongCard({super.key, required this.song, this.isOnline});
+  List<Song>? songs;
+  int index;
+
+  SongCard({super.key, this.isOnline, this.songs, this.index = 0});
 
   ApiService apiService = ApiService();
 
@@ -18,16 +20,25 @@ class SongCard extends StatelessWidget {
     return InkWell(
       onTap: () async {
         if (isOnline == true) {
-          String? stream = await apiService.getStreaming(encodeId: song.encodeId!);
-          song.q128 = stream;
+          String? stream;
+          for (Song song in songs!) {
+            stream = await apiService.getStreaming(encodeId: song.encodeId!);
+            song.q128 = stream;
+          }
         }
         if (context.mounted) {
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => SongScreen(song: songs!, index: index, isOnline: isOnline),
+          //   ),
+          // );
           showModalBottomSheet(
             useSafeArea: true,
             context: context,
             isScrollControlled: true,
             builder: (context) {
-              return SongScreen(song: [song], index: 0, isOnline: isOnline);
+              return SongScreen(song: songs!, index: index, isOnline: isOnline);
             },
           );
         }
@@ -38,7 +49,7 @@ class SongCard extends StatelessWidget {
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image(
-                    image: Image.network(song.thumbnail!).image,
+                    image: Image.network(songs![index].thumbnail!).image,
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
@@ -46,7 +57,7 @@ class SongCard extends StatelessWidget {
                 )
               : QueryArtworkWidget(
                   artworkBorder: BorderRadius.circular(10),
-                  id: int.parse(song.encodeId!),
+                  id: int.parse(songs![index].encodeId!),
                   type: ArtworkType.AUDIO,
                   quality: 100,
                   artworkQuality: FilterQuality.high,
@@ -62,7 +73,7 @@ class SongCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  song.title!,
+                  songs![index].title!,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -72,7 +83,7 @@ class SongCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  song.artistsNames!,
+                  songs![index].artistsNames!,
                   style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.black.withOpacity(0.5)),
                 ),
               ],
@@ -91,9 +102,11 @@ class SongCard extends StatelessWidget {
                       if (isOnline == true) ...[
                         ListTile(
                           onTap: () async {
-                            String? stream = await apiService.getStreaming(encodeId: song.encodeId!);
-                            song.q128 = stream;
-                            await Utils.downloadFile(song.q128!, "${song.artistsNames} - ${song.title!}.mp3");
+                            // if (songs![index].q128 == null) {
+                            //   String? stream = await apiService.getStreaming(encodeId: songs![index].encodeId!);
+                            //   songs![index].q128 = stream;
+                            // }
+                            await Utils.downloadFile(songs![index].q128!, "${songs![index].artistsNames} - ${songs![index].title!}.mp3");
                             if (context.mounted) Navigator.pop(context);
                           },
                           leading: const Icon(Icons.download, color: Colors.black),

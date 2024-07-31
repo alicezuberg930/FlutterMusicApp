@@ -22,11 +22,10 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
   }
 
   handlePermission() async {
-    bool storagePermission = await Permission.manageExternalStorage.isGranted;
-    if (storagePermission) {
+    PermissionStatus storagePermission = await Permission.manageExternalStorage.request();
+    if (storagePermission.isGranted) {
       setState(() => isAudioAllowed = true);
     } else {
-      await Permission.manageExternalStorage.request();
       openAppSettings();
     }
   }
@@ -53,7 +52,7 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator(color: Colors.purple);
                       } else if (snapshot.connectionState == ConnectionState.done) {
-                        if (snapshot.data!.isEmpty) {
+                        if (snapshot.data != null && snapshot.data!.isEmpty) {
                           return Center(
                             child: Text(
                               "No songs found on device",
@@ -62,20 +61,23 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
                           );
                         }
                       }
+                      List<Song> tempSongs = [];
+                      for (var element in snapshot.data!) {
+                        tempSongs.add(Song(
+                          encodeId: element.id.toString(),
+                          title: element.title,
+                          artistsNames: element.artist ?? "<Unknown artist>",
+                          q128: element.uri,
+                        ));
+                      }
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         separatorBuilder: (context, index) => const SizedBox(height: 15),
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: snapshot.data!.length,
+                        itemCount: tempSongs.length,
                         itemBuilder: (context, index) {
-                          Song song = Song(
-                            encodeId: snapshot.data![index].id.toString(),
-                            title: snapshot.data![index].title,
-                            artistsNames: snapshot.data![index].artist ?? "<Unknown artist>",
-                            q128: snapshot.data![index].uri,
-                          );
-                          return SongCard(song: song, isOnline: false);
+                          return SongCard(isOnline: false, songs: tempSongs, index: index);
                         },
                       );
                     },

@@ -38,7 +38,7 @@ class _NewReleaseScreenState extends State<NewReleaseScreen> {
             shrinkWrap: true,
             itemCount: widget.songs.length,
             itemBuilder: (context, index) {
-              return SongCard(song: widget.songs[index], isOnline: true);
+              return SongCard(isOnline: true, index: index, songs: widget.songs);
             },
           ),
         ),

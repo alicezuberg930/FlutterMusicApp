@@ -75,9 +75,7 @@ class _HomePageState extends State<HomeScreen> {
             const SizedBox(width: 15),
             const CircleAvatar(
               radius: 20,
-              backgroundImage: NetworkImage(
-                'https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg',
-              ),
+              backgroundImage: NetworkImage('https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg'),
             ),
             const SizedBox(width: 15),
           ],
@@ -130,7 +128,7 @@ class _HomePageState extends State<HomeScreen> {
                   itemCount: newReleaseSongs.length,
                   itemBuilder: (context, index) {
                     if (index <= 4) {
-                      return SongCard(song: newReleaseSongs[index], isOnline: true);
+                      return SongCard(isOnline: true, index: index, songs: newReleaseSongs);
                     }
                     return null;
                   },

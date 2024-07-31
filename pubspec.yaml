@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.19.2 <3.0.0"
 
 dependencies:
-  just_audio: ^0.9.28
+  just_audio: ^0.9.37
   rxdart: ^0.27.5
   dio: ^4.0.6
   dio_http_cache_lts: ^0.4.0
@@ -18,6 +18,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   just_audio_background: ^0.0.1-beta.13
   share_plus: ^7.2.2
+  speech_to_text: ^6.6.0
 
   flutter:
     sdk: flutter
