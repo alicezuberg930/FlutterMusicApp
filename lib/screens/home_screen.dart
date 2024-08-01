@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomeScreen> {
+class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
   PageController pageController = PageController();
   int selectedIndex = 0;
   List<Song> newReleaseSongs = [];
@@ -41,70 +41,6 @@ class _HomePageState extends State<HomeScreen> {
   getTop100Playlist() async {
     List<Top100>? temp = await apiService.getTop100();
     setState(() => top100s = temp);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.deepPurple.shade800.withOpacity(0.8),
-            Colors.deepPurple.shade200.withOpacity(0.8),
-          ],
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: const Icon(Icons.grid_view_rounded),
-          actions: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SearchScreen(),
-                  ),
-                );
-              },
-              child: const Icon(Icons.search),
-            ),
-            const SizedBox(width: 15),
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage('https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg'),
-            ),
-            const SizedBox(width: 15),
-          ],
-        ),
-        bottomNavigationBar: customNavigationBar(),
-        body: PageView(
-          controller: pageController,
-          onPageChanged: (value) {
-            setState(() => selectedIndex = value);
-          },
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  newReleaseSongsWidget(),
-                  top100PlaylistWidget(),
-                ],
-              ),
-            ),
-            const Text("Favorite"),
-            const LocalAudioScreen(),
-            const Text("Profile"),
-          ],
-        ),
-        bottomSheet: Constants.audioPlayer.currentIndex != null ? const MinimizeCurrentSong() : null,
-      ),
-    );
   }
 
   newReleaseSongsWidget() {
@@ -198,6 +134,70 @@ class _HomePageState extends State<HomeScreen> {
           label: "Profile",
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.deepPurple.shade200.withOpacity(0.8),
+            Colors.deepPurple.shade100.withOpacity(0.8),
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: const Icon(Icons.grid_view_rounded),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchScreen(),
+                  ),
+                );
+              },
+              child: const Icon(Icons.search),
+            ),
+            const SizedBox(width: 15),
+            const CircleAvatar(
+              radius: 20,
+              backgroundImage: NetworkImage('https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg'),
+            ),
+            const SizedBox(width: 15),
+          ],
+        ),
+        bottomNavigationBar: customNavigationBar(),
+        body: PageView(
+          controller: pageController,
+          onPageChanged: (value) {
+            setState(() => selectedIndex = value);
+          },
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  newReleaseSongsWidget(),
+                  top100PlaylistWidget(),
+                ],
+              ),
+            ),
+            const Text("Favorite"),
+            const LocalAudioScreen(),
+            const Text("Profile"),
+          ],
+        ),
+        bottomSheet: Constants.audioPlayer.currentIndex != null ? const MinimizeCurrentSong() : null,
+      ),
     );
   }
 }
