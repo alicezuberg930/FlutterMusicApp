@@ -34,12 +34,12 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getHome() async {
-    List<Song> temp = await apiService.getHome();
+    List<Song> temp = await ApiService.getHome();
     setState(() => newReleaseSongs = temp);
   }
 
   getTop100Playlist() async {
-    List<Top100>? temp = await apiService.getTop100();
+    List<Top100>? temp = await ApiService.getTop100();
     setState(() => top100s = temp);
   }
 
@@ -158,7 +158,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           leading: const Icon(Icons.grid_view_rounded),
           actions: [
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(

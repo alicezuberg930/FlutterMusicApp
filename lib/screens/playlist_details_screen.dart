@@ -17,7 +17,6 @@ class PlayListDetailsScreen extends StatefulWidget {
 }
 
 class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
-  ApiService apiService = ApiService();
   Playlist? playlist;
   String? totalTime;
   AudioPlayer audioPlayer = AudioPlayer();
@@ -39,7 +38,7 @@ class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
   }
 
   getPlaylist() async {
-    Playlist? temp = await apiService.getPlaylist(encodeId: widget.encodeId);
+    Playlist? temp = await ApiService.getPlaylist(encodeId: widget.encodeId);
     int seconds = 0;
     for (Song song in temp!.songs) {
       seconds += song.duration!;

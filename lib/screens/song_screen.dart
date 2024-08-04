@@ -25,9 +25,8 @@ class SongScreen extends StatefulWidget {
   State<SongScreen> createState() => _SongPageState();
 }
 
-class _SongPageState extends State<SongScreen> {
+class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMixin {
   int songIndex = 0;
-  ApiService apiService = ApiService();
   Stream<SeekBarData> seekBarDataStream = rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
     Constants.audioPlayer.positionStream,
     Constants.audioPlayer.durationStream,
@@ -40,9 +39,16 @@ class _SongPageState extends State<SongScreen> {
   );
   late StreamSubscription<SequenceState?> streamSubscription;
   String? currentQ128;
+  bool isLoop = false;
+  late AnimationController animationController;
 
   @override
   void initState() {
+    // animationController = AnimationController(
+    //   duration: Duration(seconds: 222),
+    //   vsync: this,
+    // )..addListener(() => setState(() {}));
+    // animationController.repeat();
     songIndex = widget.index;
     if ((Constants.audioPlayer.audioSource != null && Constants.audioPlayer.currentIndex != songIndex) || Constants.audioPlayer.audioSource == null) {
       initSongs();
@@ -58,12 +64,13 @@ class _SongPageState extends State<SongScreen> {
 
   @override
   void dispose() {
+    animationController.dispose();
     streamSubscription.cancel();
     super.dispose();
   }
 
   setCurrentAudioSource() async {
-    currentQ128 = await apiService.getStreaming(encodeId: widget.song[songIndex].encodeId!);
+    currentQ128 = await ApiService.getStreaming(encodeId: widget.song[songIndex].encodeId!);
     await Constants.audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         children: [
@@ -110,21 +117,33 @@ class _SongPageState extends State<SongScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Stack(
-        fit: StackFit.expand,
+        alignment: Alignment.topCenter,
+        // fit: StackFit.loose,
         children: [
-          widget.isOnline == true
-              ? Image.network(widget.song[songIndex].thumbnailM!, fit: BoxFit.cover)
-              : QueryArtworkWidget(
-                  artworkHeight: MediaQuery.of(context).size.height,
-                  artworkWidth: MediaQuery.of(context).size.width,
-                  artworkFit: BoxFit.cover,
-                  artworkBorder: BorderRadius.circular(10),
-                  id: int.parse(widget.song[songIndex].encodeId!),
-                  type: ArtworkType.AUDIO,
-                  quality: 100,
-                  artworkQuality: FilterQuality.high,
-                ),
           backgroundFilter(),
+          Positioned(
+            top: MediaQuery.of(context).size.width * 0.3,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(200),
+              child: widget.isOnline == true
+                  ? Image.network(
+                      widget.song[songIndex].thumbnailM!,
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
+                      height: MediaQuery.of(context).size.width * 0.8,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                    )
+                  : QueryArtworkWidget(
+                      artworkHeight: MediaQuery.of(context).size.width * 0.8,
+                      artworkWidth: MediaQuery.of(context).size.width * 0.8,
+                      artworkFit: BoxFit.cover,
+                      id: int.parse(widget.song[songIndex].encodeId!),
+                      type: ArtworkType.AUDIO,
+                      quality: 100,
+                      artworkQuality: FilterQuality.high,
+                    ),
+            ),
+          ),
           Positioned(
             top: 0,
             left: 0,
@@ -143,29 +162,20 @@ class _SongPageState extends State<SongScreen> {
   backgroundFilter() {
     return ShaderMask(
       shaderCallback: (rect) {
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+        return const LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
           colors: [
-            Colors.white,
-            Colors.white.withOpacity(0.5),
-            Colors.white.withOpacity(0.0),
+            Color(0xFF000000),
+            Color(0xFF4C0053),
+            Color(0xFFB471AE),
           ],
-          stops: const [0.2, 0.4, 0.7],
+          stops: [0.0, 0.5, 1.0],
         ).createShader(rect);
       },
-      blendMode: BlendMode.dstOut,
+      blendMode: BlendMode.srcATop,
       child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.shade200,
-              Colors.deepPurple.shade800,
-            ],
-          ),
-        ),
+        color: Colors.white,
       ),
     );
   }
@@ -221,7 +231,7 @@ class _SongPageState extends State<SongScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                  await Share.share("https://zingmp3.vn${song.link}", subject: "Look at this song");
+                  await Share.share("${Constants.apiUrl}${song.link}", subject: "Look at this song");
                 },
                 iconSize: 30,
                 color: Colors.white,
@@ -248,12 +258,18 @@ class _SongPageState extends State<SongScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        IconButton(
+          iconSize: 30,
+          color: isLoop ? Colors.purple[600] : Colors.grey,
+          onPressed: () {},
+          icon: const Icon(Icons.shuffle),
+        ),
         StreamBuilder(
           stream: audioPlayer.sequenceStateStream,
           builder: (context, snapshot) {
             return IconButton(
               iconSize: 60,
-              color: audioPlayer.hasPrevious ? Colors.blue.shade400 : Colors.grey,
+              color: audioPlayer.hasPrevious ? Colors.white : Colors.grey[600],
               onPressed: () {
                 if (audioPlayer.hasPrevious) {
                   audioPlayer.seekToPrevious();
@@ -284,7 +300,7 @@ class _SongPageState extends State<SongScreen> {
                     audioPlayer.play();
                   },
                   iconSize: 60,
-                  icon: Icon(Icons.play_circle, color: Colors.blue.shade400),
+                  icon: const Icon(Icons.play_circle, color: Colors.white),
                 );
               } else if (processingState != ProcessingState.completed) {
                 return IconButton(
@@ -292,7 +308,7 @@ class _SongPageState extends State<SongScreen> {
                     audioPlayer.pause();
                   },
                   iconSize: 60,
-                  icon: Icon(Icons.pause_circle, color: Colors.blue.shade400),
+                  icon: const Icon(Icons.pause_circle, color: Colors.white),
                 );
               } else {
                 return IconButton(
@@ -300,7 +316,7 @@ class _SongPageState extends State<SongScreen> {
                     audioPlayer.seek(Duration.zero, index: audioPlayer.effectiveIndices!.first);
                   },
                   iconSize: 60,
-                  icon: Icon(Icons.replay_circle_filled_outlined, color: Colors.blue.shade300),
+                  icon: const Icon(Icons.replay_circle_filled_outlined, color: Colors.white),
                 );
               }
             } else {
@@ -313,7 +329,7 @@ class _SongPageState extends State<SongScreen> {
           builder: (context, snapshot) {
             return IconButton(
               iconSize: 60,
-              color: audioPlayer.hasNext ? Colors.blue.shade400 : Colors.grey,
+              color: audioPlayer.hasNext ? Colors.white : Colors.grey[600],
               onPressed: () {
                 if (audioPlayer.hasNext) {
                   audioPlayer.seekToNext();
@@ -324,6 +340,19 @@ class _SongPageState extends State<SongScreen> {
               icon: const Icon(Icons.skip_next),
             );
           },
+        ),
+        IconButton(
+          iconSize: 30,
+          color: isLoop ? Colors.purple[600] : Colors.grey,
+          onPressed: () {
+            if (isLoop) {
+              audioPlayer.setLoopMode(LoopMode.off);
+            } else {
+              audioPlayer.setLoopMode(LoopMode.one);
+            }
+            setState(() => isLoop = !isLoop);
+          },
+          icon: const Icon(Icons.replay),
         ),
       ],
     );

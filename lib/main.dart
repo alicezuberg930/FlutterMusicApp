@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/screens/home_screen.dart';
+import 'package:flutter_music_app/services/http_service.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
 void main() async {
@@ -12,6 +13,7 @@ void main() async {
     androidNotificationOngoing: true,
   );
   await FlutterDownloader.initialize(debug: false);
+  await HttpService.initialize();
   runApp(const MainApp());
 }
 

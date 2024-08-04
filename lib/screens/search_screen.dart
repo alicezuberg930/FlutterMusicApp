@@ -15,7 +15,6 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderStateMixin {
   Search? searchData;
-  ApiService apiService = ApiService();
   List<Tab> tabList = const [
     Tab(child: Text("Songs")),
     Tab(child: Text("Playlists")),
@@ -45,7 +44,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   fetchSearchData() {
     debouncer.run(() {
       setState(() => isSearching = true);
-      apiService.search(query: searchController.text).then((value) {
+      ApiService.search(query: searchController.text).then((value) {
         setState(() {
           searchData = value;
           isSearching = false;
@@ -84,7 +83,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                       searchController.clear();
                       searchController.text = value;
                       setState(() => isSearching = true);
-                      apiService.search(query: searchController.text).then((value) {
+                      ApiService.search(query: searchController.text).then((value) {
                         setState(() {
                           searchData = value;
                           isSearching = false;
