@@ -1,5 +1,7 @@
-// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable, use_build_context_synchronously
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
+import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/screens/song_screen.dart';
@@ -17,23 +19,15 @@ class SongCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        if (isOnline!) songs![index].q128 = await ApiService.getStreaming(encodeId: songs![index].encodeId!);
-        if (context.mounted) {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => SongScreen(song: songs!, index: index, isOnline: isOnline),
-          //   ),
-          // );
-          showModalBottomSheet(
-            useSafeArea: true,
-            context: context,
-            isScrollControlled: true,
-            builder: (context) {
-              return SongScreen(song: songs!, index: index, isOnline: isOnline);
-            },
-          );
-        }
+        if (isOnline!) songs![index].q128 = await ApiService.getStreaming(encodeId: songs![index].encodeId!) ?? Constants.apiUrl;
+        showModalBottomSheet(
+          useSafeArea: true,
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return SongScreen(song: songs!, index: index, isOnline: isOnline);
+          },
+        );
       },
       child: Row(
         children: [
@@ -94,10 +88,10 @@ class SongCard extends StatelessWidget {
                       if (isOnline == true) ...[
                         ListTile(
                           onTap: () async {
-                            // if (songs![index].q128 == null) {
-                            //   String? stream = await apiService.getStreaming(encodeId: songs![index].encodeId!);
-                            //   songs![index].q128 = stream;
-                            // }
+                            if (songs![index].q128 == Constants.defaultAudio) {
+                              UIHelpers.showSnackBar(message: "Bai hat chi danh cho tai khoan vip");
+                              return;
+                            }
                             await Utils.downloadFile(songs![index].q128!, "${songs![index].artistsNames} - ${songs![index].title!}.mp3");
                             if (context.mounted) Navigator.pop(context);
                           },

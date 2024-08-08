@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/utils.dart';
 
 class SeekBarData {
   final Duration position;
@@ -32,7 +33,7 @@ class _SeekBarState extends State<SeekBar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(formatDuration(widget.position)),
+        Text(Utils.formatDuration(widget.position)),
         Expanded(
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -70,18 +71,8 @@ class _SeekBarState extends State<SeekBar> {
             ),
           ),
         ),
-        Text(formatDuration(widget.duration)),
+        Text(Utils.formatDuration(widget.duration)),
       ],
     );
-  }
-
-  formatDuration(Duration? duration) {
-    if (duration == null) {
-      return "00:00";
-    } else {
-      String minutes = duration.inMinutes.toString().padLeft(2, '0');
-      String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-      return "$minutes:$seconds";
-    }
   }
 }

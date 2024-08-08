@@ -2,6 +2,12 @@ import 'package:flutter_music_app/models/artist.dart';
 import 'package:flutter_music_app/models/song.dart';
 
 class Video extends Song {
+  List<Video> recommends = [];
+  dynamic streaming;
+  Artist? artist;
+  int? like;
+  String? lyrics;
+
   Video({
     String? encodeId,
     String? title,
@@ -15,6 +21,11 @@ class Video extends Song {
     List<dynamic>? genreIds,
     bool? hasLyric,
     String? q128,
+    required this.recommends,
+    this.streaming,
+    this.artist,
+    this.like,
+    this.lyrics,
   }) : super(
           encodeId: encodeId,
           title: title,
@@ -32,7 +43,11 @@ class Video extends Song {
 
   factory Video.fromJson(Map<String, dynamic> json) {
     List<Artist> tempArtists = [];
+    List<Video> tempVideos = [];
     if (json['artists'].isNotEmpty) json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
+    if (json['recommends'] != null && json['recommends'].isNotEmpty) {
+      json['recommends'].forEach((recommend) => tempVideos.add(Video.fromJson(recommend)));
+    }
 
     return Video(
       encodeId: json['encodeId'],
@@ -47,6 +62,11 @@ class Video extends Song {
       genreIds: json['genreIds'],
       hasLyric: json['hasLyric'],
       q128: json['streaming']?['128'],
+      recommends: tempVideos,
+      streaming: json['streaming']?['mp4'],
+      artist: Artist.fromJson(json['artist']),
+      like: json['like'],
+      lyrics: json['lyrics'] != null ? json['lyrics'][0]['content'] : null,
     );
   }
 

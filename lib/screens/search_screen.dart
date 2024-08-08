@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/debouncer.dart';
 import 'package:flutter_music_app/models/search.dart';
+import 'package:flutter_music_app/screens/artist_details_screen.dart';
 import 'package:flutter_music_app/screens/playlist_details_screen.dart';
 import 'package:flutter_music_app/screens/speech_to_text_scree.dart';
+import 'package:flutter_music_app/screens/video_player_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 
@@ -118,31 +120,6 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           searchedPlaylistsWidget(),
           searchedArtistsWidget(),
           searchedMVWidgets(),
-          // Column(
-          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //   children: [
-          //     Text(
-          //       isListening ? searchController.text : "Press on the mic",
-          //       style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.black),
-          //     ),
-          //     IconButton(
-          //       splashRadius: 60,
-          //       splashColor: Colors.blue,
-          //       color: Colors.blue[400],
-          //       onPressed: () {
-          //         if (speechToText.isListening) {
-          //           speechToText.stop();
-          //           setState(() => isListening = false);
-          //         } else {
-          //           startListening();
-          //           setState(() => isListening = true);
-          //         }
-          //       },
-          //       iconSize: 60,
-          //       icon: Icon(isListening ? Icons.stop_circle : Icons.mic),
-          //     ),
-          //   ],
-          // )
         ],
       ),
     );
@@ -244,12 +221,12 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => PlayListDetailsScreen(encodeId: searchData!.playlists[index].encodeId!),
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ArtistDetailsScreen(),
+                        ),
+                      );
                     },
                     child: Row(
                       children: [
@@ -309,12 +286,12 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => PlayListDetailsScreen(encodeId: searchData!.playlists[index].encodeId!),
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => VideoPlayerScreen(encodeId: searchData!.videos[index].encodeId!),
+                        ),
+                      );
                     },
                     child: Row(
                       children: [

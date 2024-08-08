@@ -5,14 +5,22 @@ import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/top100.dart';
+import 'package:flutter_music_app/models/video.dart';
 import 'package:flutter_music_app/services/http_service.dart';
 
 class ApiService {
+  static String searchEndpoint = "/api/v2/search/multi";
+  static String homeEndpoint = "/api/v2/page/get/home";
+  static String top100Endpoint = "/api/v2/page/get/top-100";
+  static String playlistEndpoint = "/api/v2/page/get/playlist";
+  static String streamingEndpoint = "/api/v2/song/get/streaming";
+  static String videoEndpoint = "/api/v2/page/get/video";
+
   static Future<Search?> search({required String query}) async {
     try {
       final response = await HttpService.get(
-        "${Constants.apiUrl}/api/v2/search/multi",
-        queryParameters: {"q": query, "sig": Utils.hashParamNoId("/api/v2/search/multi")},
+        "${Constants.apiUrl}$searchEndpoint",
+        queryParameters: {"q": query, "sig": Utils.hashParamNoId(searchEndpoint)},
       );
       if (response.data['err'] == 0) {
         return Search.fromJson(response.data["data"]);
@@ -31,11 +39,11 @@ class ApiService {
 
   static Future<List<Song>> getHome() async {
     try {
-      final response = await HttpService.get("${Constants.apiUrl}/api/v2/page/get/home", queryParameters: {
+      final response = await HttpService.get("${Constants.apiUrl}$homeEndpoint", queryParameters: {
         "page": 1,
         "segmentId": "-1",
         "count": "30",
-        "sig": Utils.hashParamHome("/api/v2/page/get/home"),
+        "sig": Utils.hashParamHome(homeEndpoint),
       });
       if (response.data['err'] == 0) {
         List<Song> songs = [];
@@ -57,8 +65,8 @@ class ApiService {
   static Future<List<Top100>> getTop100() async {
     try {
       final response = await HttpService.get(
-        "${Constants.apiUrl}/api/v2/page/get/top-100",
-        queryParameters: {"sig": Utils.hashParamNoId("/api/v2/page/get/top-100")},
+        "${Constants.apiUrl}$top100Endpoint",
+        queryParameters: {"sig": Utils.hashParamNoId(top100Endpoint)},
       );
       if (response.data['err'] == 0) {
         List<Top100> top100s = [];
@@ -80,8 +88,8 @@ class ApiService {
   static Future<Playlist?> getPlaylist({required String encodeId}) async {
     try {
       final response = await HttpService.get(
-        "${Constants.apiUrl}/api/v2/page/get/playlist",
-        queryParameters: {'id': encodeId, "sig": Utils.hashParamWithId("/api/v2/page/get/playlist", encodeId)},
+        "${Constants.apiUrl}$playlistEndpoint",
+        queryParameters: {'id': encodeId, "sig": Utils.hashParamWithId(playlistEndpoint, encodeId)},
       );
       if (response.data['err'] == 0) {
         return Playlist.fromJson(response.data["data"]);
@@ -101,11 +109,32 @@ class ApiService {
   static Future<String?> getStreaming({required String encodeId}) async {
     try {
       final response = await HttpService.get(
-        "${Constants.apiUrl}/api/v2/song/get/streaming",
-        queryParameters: {"id": encodeId, "sig": Utils.hashParamWithId("/api/v2/song/get/streaming", encodeId)},
+        "${Constants.apiUrl}$streamingEndpoint",
+        queryParameters: {"id": encodeId, "sig": Utils.hashParamWithId(streamingEndpoint, encodeId)},
       );
       if (response.data['err'] == 0) {
         return response.data['data']['128'];
+      } else if (response.data['err'] != 0) {
+        UIHelpers.showSnackBar(message: response.data['msg']);
+        return null;
+      } else {
+        UIHelpers.showSnackBar(message: response.data['msg']);
+        return null;
+      }
+    } catch (e) {
+      UIHelpers.showSnackBar(message: e.toString());
+      return null;
+    }
+  }
+
+  static Future<Video?> getVideo({required String encodeId}) async {
+    try {
+      final response = await HttpService.get(
+        "${Constants.apiUrl}$videoEndpoint",
+        queryParameters: {"id": encodeId, "sig": Utils.hashParamWithId(videoEndpoint, encodeId)},
+      );
+      if (response.data['err'] == 0) {
+        return Video.fromJson(response.data['data']);
       } else if (response.data['err'] != 0) {
         UIHelpers.showSnackBar(message: response.data['msg']);
         return null;

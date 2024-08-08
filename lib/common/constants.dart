@@ -5,7 +5,7 @@ class Constants {
   static String apiUrl = "https://zingmp3.vn/";
   static GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   static AudioPlayer audioPlayer = AudioPlayer();
-  static String defaultAudio = "https://cdn.pixabay.com/download/audio/2022/02/10/audio_7a07ee0e79.mp3?filename=birds-19624.mp3";
+  static String defaultAudio = "https://cdn.pixabay.com/download/audio/2022/03/23/audio_4ce5f46cbd.mp3?filename=nature-99499.mp3";
   static String zingMP3Version = "1.6.34";
   static String secretKey = "2aa2d1c561e809b267f3638c4a307aab";
   static String apiKey = "88265e23d4284f25963e6eedac8fbfa3";

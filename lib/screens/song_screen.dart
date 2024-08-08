@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
@@ -41,22 +42,25 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
   String? currentQ128;
   bool isLoop = false;
   late AnimationController animationController;
+  Uint8List? offlineImg;
 
   @override
   void initState() {
-    // animationController = AnimationController(
-    //   duration: Duration(seconds: 222),
-    //   vsync: this,
-    // )..addListener(() => setState(() {}));
-    // animationController.repeat();
+    animationController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..addListener(() => setState(() {}));
+    if (Constants.audioPlayer.playing) animationController.repeat();
     songIndex = widget.index;
     if ((Constants.audioPlayer.audioSource != null && Constants.audioPlayer.currentIndex != songIndex) || Constants.audioPlayer.audioSource == null) {
       initSongs();
     }
+    if (widget.isOnline == false) getOfflineImage();
     streamSubscription = Constants.audioPlayer.sequenceStateStream.listen((event) {
       if (event != null && event.currentIndex > songIndex) {
         setState(() => songIndex += 1);
         if (widget.isOnline == true) setCurrentAudioSource();
+        if (widget.isOnline == false) getOfflineImage();
       }
     });
     super.initState();
@@ -67,6 +71,16 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
     animationController.dispose();
     streamSubscription.cancel();
     super.dispose();
+  }
+
+  getOfflineImage() async {
+    Uint8List? temp = await OnAudioQuery().queryArtwork(
+      int.parse(widget.song[songIndex].encodeId!),
+      ArtworkType.AUDIO,
+      quality: 100,
+      format: ArtworkFormat.JPEG,
+    );
+    setState(() => offlineImg = temp);
   }
 
   setCurrentAudioSource() async {
@@ -118,42 +132,11 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
       extendBodyBehindAppBar: true,
       body: Stack(
         alignment: Alignment.topCenter,
-        // fit: StackFit.loose,
         children: [
           backgroundFilter(),
-          Positioned(
-            top: MediaQuery.of(context).size.width * 0.3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(200),
-              child: widget.isOnline == true
-                  ? Image.network(
-                      widget.song[songIndex].thumbnailM!,
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.high,
-                      height: MediaQuery.of(context).size.width * 0.8,
-                      width: MediaQuery.of(context).size.width * 0.8,
-                    )
-                  : QueryArtworkWidget(
-                      artworkHeight: MediaQuery.of(context).size.width * 0.8,
-                      artworkWidth: MediaQuery.of(context).size.width * 0.8,
-                      artworkFit: BoxFit.cover,
-                      id: int.parse(widget.song[songIndex].encodeId!),
-                      type: ArtworkType.AUDIO,
-                      quality: 100,
-                      artworkQuality: FilterQuality.high,
-                    ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            child: IconButton(
-              iconSize: 35,
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
-            ),
-          ),
-          musicPlayerWidget(widget.song[songIndex]),
+          musicBackgroundWidget(),
+          exitButtonWidget(),
+          musicPlayerWidget(),
         ],
       ),
     );
@@ -180,7 +163,50 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
     );
   }
 
-  musicPlayerWidget(Song song) {
+  musicBackgroundWidget() {
+    return Positioned(
+      top: MediaQuery.of(context).size.width * 0.3,
+      child: RotationTransition(
+        turns: animationController,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(200),
+          child: widget.isOnline == true
+              ? Image.network(
+                  widget.song[songIndex].thumbnailM!,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                  height: MediaQuery.of(context).size.width * 0.8,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                )
+              : offlineImg != null
+                  ? Image.memory(
+                      offlineImg!,
+                      scale: 2,
+                      height: MediaQuery.of(context).size.width * 0.8,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(200),
+                      child: Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.1),
+                        height: MediaQuery.of(context).size.width * 0.8,
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: Image.asset(
+                          "assets/image/music_note.png",
+                          color: Colors.purpleAccent,
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
+                    ),
+        ),
+      ),
+    );
+  }
+
+  musicPlayerWidget() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Column(
@@ -188,12 +214,12 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            song.title!,
+            widget.song[songIndex].title!,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
           Text(
-            song.artistsNames!,
+            widget.song[songIndex].artistsNames!,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 30),
@@ -210,7 +236,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [playerButton(Constants.audioPlayer)],
+            children: [playerButtonWidget(Constants.audioPlayer)],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,7 +257,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
               ),
               IconButton(
                 onPressed: () async {
-                  await Share.share("${Constants.apiUrl}${song.link}", subject: "Look at this song");
+                  await Share.share("${Constants.apiUrl}${widget.song[songIndex].link}", subject: "Look at this song");
                 },
                 iconSize: 30,
                 color: Colors.white,
@@ -240,7 +266,10 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
               if (widget.isOnline == true) ...[
                 IconButton(
                   onPressed: () async {
-                    await Utils.downloadFile(song.q128!, "${song.artistsNames} - ${song.title!}.mp3");
+                    await Utils.downloadFile(
+                      widget.song[songIndex].q128!,
+                      "${widget.song[songIndex].artistsNames} - ${widget.song[songIndex].title!}.mp3",
+                    );
                   },
                   iconSize: 30,
                   color: Colors.white,
@@ -254,7 +283,19 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
     );
   }
 
-  playerButton(AudioPlayer audioPlayer) {
+  exitButtonWidget() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      child: IconButton(
+        iconSize: 35,
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+      ),
+    );
+  }
+
+  playerButtonWidget(AudioPlayer audioPlayer) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -275,6 +316,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
                   audioPlayer.seekToPrevious();
                   setState(() => songIndex -= 1);
                   if (widget.isOnline == true) setCurrentAudioSource();
+                  if (widget.isOnline == false) getOfflineImage();
                 }
               },
               icon: const Icon(Icons.skip_previous),
@@ -297,6 +339,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
               } else if (!audioPlayer.playing) {
                 return IconButton(
                   onPressed: () {
+                    animationController.repeat();
                     audioPlayer.play();
                   },
                   iconSize: 60,
@@ -305,6 +348,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
               } else if (processingState != ProcessingState.completed) {
                 return IconButton(
                   onPressed: () {
+                    animationController.stop();
                     audioPlayer.pause();
                   },
                   iconSize: 60,
@@ -335,6 +379,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
                   audioPlayer.seekToNext();
                   setState(() => songIndex += 1);
                   if (widget.isOnline == true) setCurrentAudioSource();
+                  if (widget.isOnline == false) getOfflineImage();
                 }
               },
               icon: const Icon(Icons.skip_next),

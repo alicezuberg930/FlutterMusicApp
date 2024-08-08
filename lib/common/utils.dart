@@ -35,6 +35,16 @@ class Utils {
     }
   }
 
+  static String formatDuration(Duration? duration) {
+    if (duration == null) {
+      return "00:00";
+    } else {
+      String minutes = duration.inMinutes.toString().padLeft(2, '0');
+      String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+      return "$minutes:$seconds";
+    }
+  }
+
   static String getHash256(String str) {
     var bytes = utf8.encode(str); // Convert the input string to bytes
     var digest = sha256.convert(bytes); // Compute the SHA-256 hash

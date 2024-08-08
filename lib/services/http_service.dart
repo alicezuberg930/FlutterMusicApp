@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 
 class HttpService {
   static late Dio dio;
-  static Directory? appDocDir;
 
   static initialize() async {
     BaseOptions baseOptions = BaseOptions(
@@ -17,7 +16,7 @@ class HttpService {
       connectTimeout: const Duration(seconds: 5),
     );
     dio = Dio(baseOptions);
-    appDocDir = await getDownloadsDirectory();
+    Directory? appDocDir = await getDownloadsDirectory();
     String appDocPath = appDocDir!.path;
     // Use PersistCookieJar to save/load cookies
     PersistCookieJar cookieJar = PersistCookieJar(storage: FileStorage("$appDocPath/cookies"));
@@ -38,11 +37,10 @@ class HttpService {
       // Get cookies for the site
       List<Cookie> cookies = await cookieJar.loadForRequest(Uri.parse(Constants.apiUrl));
       for (var cookie in cookies) {
-        print('Cookie from ${Constants.apiUrl}: $cookie'); // Print each cookie
+        print('Cookie from ${Constants.apiUrl}: $cookie');
       }
     } on DioException catch (e) {
       print('Request to ${Constants.apiUrl} failed with status: ${e.response?.statusCode}');
-      print('Error data: ${e.response?.data}');
     }
   }
 
@@ -120,7 +118,7 @@ class HttpService {
         data: formData ?? FormData.fromMap(body),
         options: mOptions,
       );
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       response = formatDioExecption(error);
     }
     return response;
