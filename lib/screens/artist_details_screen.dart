@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ArtistDetailsScreen extends StatefulWidget {
-  const ArtistDetailsScreen({super.key});
+  final String encodeId;
+  const ArtistDetailsScreen({super.key, required this.encodeId});
 
   @override
   State<ArtistDetailsScreen> createState() => _ArtistDetailsScreenState();

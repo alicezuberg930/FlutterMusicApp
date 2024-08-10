@@ -7,6 +7,7 @@ import 'package:flutter_music_app/screens/new_release_screen.dart';
 import 'package:flutter_music_app/screens/search_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
+import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
 import 'package:flutter_music_app/widgets/minimize_current_song.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
@@ -50,11 +51,9 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           InkWell(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NewReleaseScreen(songs: newReleaseSongs),
-                ),
+              Constants.navigatorKey!.currentState!.pushNamed(
+                RouteGeneratorService.newReleaseScreen,
+                arguments: {'songs': newReleaseSongs},
               );
             },
             child: const SectionHeader(title: 'New release'),
@@ -85,11 +84,9 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           InkWell(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Top100PlaylistsScreen(top100s: top100s),
-                ),
+              Constants.navigatorKey!.currentState!.pushNamed(
+                RouteGeneratorService.top100PlaylistScreen,
+                arguments: {'top100s': top100s},
               );
             },
             child: const SectionHeader(title: 'Top 100'),
@@ -159,12 +156,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           actions: [
             GestureDetector(
               onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SearchScreen(),
-                  ),
-                );
+                Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.searchScreen);
               },
               child: const Icon(Icons.search),
             ),

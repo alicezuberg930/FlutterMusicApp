@@ -10,4 +10,5 @@ class Constants {
   static String secretKey = "2aa2d1c561e809b267f3638c4a307aab";
   static String apiKey = "88265e23d4284f25963e6eedac8fbfa3";
   static String ctime = (DateTime.now().millisecondsSinceEpoch / 1000).floor().toString();
+  static GlobalKey<NavigatorState>? navigatorKey;
 }

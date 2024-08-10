@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/debouncer.dart';
 import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/screens/artist_details_screen.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_music_app/screens/playlist_details_screen.dart';
 import 'package:flutter_music_app/screens/speech_to_text_scree.dart';
 import 'package:flutter_music_app/screens/video_player_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
+import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -74,16 +76,11 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             prefixIcon: const Icon(Icons.search, color: Colors.black),
             suffixIcon: GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SpeechToTextScreen(),
-                  ),
-                ).then(
+                Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.speechToTextScreen).then(
                   (value) {
                     if (value != null) {
                       searchController.clear();
-                      searchController.text = value;
+                      searchController.text = value.toString();
                       setState(() => isSearching = true);
                       ApiService.search(query: searchController.text).then((value) {
                         setState(() {
@@ -154,11 +151,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlayListDetailsScreen(encodeId: searchData!.playlists[index].encodeId!),
-                        ),
+                      Constants.navigatorKey!.currentState!.pushNamed(
+                        RouteGeneratorService.playlistDetailsScreen,
+                        arguments: {'encodeId': searchData!.playlists[index].encodeId!},
                       );
                     },
                     child: Row(
@@ -221,11 +216,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ArtistDetailsScreen(),
-                        ),
+                      Constants.navigatorKey!.currentState!.pushNamed(
+                        RouteGeneratorService.artistDetailsScreen,
+                        arguments: {'encodeId': searchData!.artists[index].id!},
                       );
                     },
                     child: Row(
@@ -286,11 +279,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => VideoPlayerScreen(encodeId: searchData!.videos[index].encodeId!),
-                        ),
+                      Constants.navigatorKey!.currentState!.pushNamed(
+                        RouteGeneratorService.videoPlayerScreen,
+                        arguments: {'encodeId': searchData!.videos[index].encodeId!},
                       );
                     },
                     child: Row(

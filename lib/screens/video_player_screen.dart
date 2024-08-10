@@ -2,9 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/video.dart';
 import 'package:flutter_music_app/services/api_service.dart';
+import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
@@ -371,11 +373,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> with SingleTicker
               padding: const EdgeInsets.all(13),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => VideoPlayerScreen(encodeId: video!.recommends[index].encodeId!),
-                    ),
+                  Constants.navigatorKey!.currentState!.pushNamed(
+                    RouteGeneratorService.videoPlayerScreen,
+                    arguments: {'encodeId': video!.recommends[index].encodeId!},
                   );
                 },
                 child: Column(

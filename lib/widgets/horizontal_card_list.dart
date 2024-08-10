@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/screens/playlist_details_screen.dart';
+import 'package:flutter_music_app/services/route_generator_service.dart';
 
 class HorizontalCardList extends StatelessWidget {
   final List<Playlist> playlists;
@@ -17,11 +19,9 @@ class HorizontalCardList extends StatelessWidget {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PlayListDetailsScreen(encodeId: playlists[index].encodeId!),
-                ),
+              Constants.navigatorKey!.currentState!.pushNamed(
+                RouteGeneratorService.playlistDetailsScreen,
+                arguments: {'encodeId': playlists[index].encodeId!},
               );
             },
             child: SizedBox(

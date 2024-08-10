@@ -8,6 +8,7 @@ import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/screens/artist_details_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
+import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/seekbar.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -243,14 +244,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ArtistDetailsScreen(),
-                    ),
-                  );
-                },
+                onPressed: () {},
                 iconSize: 30,
                 color: Colors.white,
                 icon: const Icon(Icons.thumb_up),
