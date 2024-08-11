@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
-import 'package:flutter_music_app/screens/artist_details_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
-import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/seekbar.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -127,22 +125,6 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          backgroundFilter(),
-          musicBackgroundWidget(),
-          exitButtonWidget(),
-          musicPlayerWidget(),
-        ],
-      ),
-    );
-  }
-
   backgroundFilter() {
     return ShaderMask(
       shaderCallback: (rect) {
@@ -251,7 +233,9 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
               ),
               IconButton(
                 onPressed: () async {
-                  await Share.share("${Constants.apiUrl}${widget.song[songIndex].link}", subject: "Look at this song");
+                  if (widget.song[songIndex].link != null) {
+                    await Share.share("${Constants.apiUrl}${widget.song[songIndex].link!.substring(1)}", subject: "Look at this song");
+                  }
                 },
                 iconSize: 30,
                 color: Colors.white,
@@ -261,7 +245,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
                 IconButton(
                   onPressed: () async {
                     await Utils.downloadFile(
-                      widget.song[songIndex].q128!,
+                      widget.song[songIndex].q128 ?? currentQ128!,
                       "${widget.song[songIndex].artistsNames} - ${widget.song[songIndex].title!}.mp3",
                     );
                   },
@@ -394,6 +378,22 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
           icon: const Icon(Icons.replay),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          backgroundFilter(),
+          musicBackgroundWidget(),
+          exitButtonWidget(),
+          musicPlayerWidget(),
+        ],
+      ),
     );
   }
 }

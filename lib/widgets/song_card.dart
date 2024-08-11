@@ -12,8 +12,9 @@ class SongCard extends StatelessWidget {
   bool? isOnline;
   List<Song>? songs;
   int index;
+  Color? textColor;
 
-  SongCard({super.key, this.isOnline, this.songs, this.index = 0});
+  SongCard({super.key, this.isOnline, this.songs, this.index = 0, this.textColor = Colors.black});
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +61,9 @@ class SongCard extends StatelessWidget {
               children: [
                 Text(
                   songs![index].title!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: textColor,
                     fontSize: 16,
                   ),
                   maxLines: 1,
@@ -70,13 +71,13 @@ class SongCard extends StatelessWidget {
                 ),
                 Text(
                   songs![index].artistsNames!,
-                  style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.black.withOpacity(0.5)),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: textColor!.withOpacity(0.5)),
                 ),
               ],
             ),
           ),
           InkWell(
-            child: const Icon(Icons.more_vert),
+            child: Icon(Icons.more_vert, color: textColor),
             onTap: () {
               showModalBottomSheet(
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),

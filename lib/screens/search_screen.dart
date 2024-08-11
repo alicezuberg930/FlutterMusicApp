@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/debouncer.dart';
 import 'package:flutter_music_app/models/search.dart';
-import 'package:flutter_music_app/screens/artist_details_screen.dart';
-import 'package:flutter_music_app/screens/playlist_details_screen.dart';
-import 'package:flutter_music_app/screens/speech_to_text_scree.dart';
-import 'package:flutter_music_app/screens/video_player_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
@@ -55,71 +51,6 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         });
       });
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        title: TextFormField(
-          onChanged: (value) => fetchSearchData(),
-          controller: searchController,
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.all(0),
-            filled: true,
-            fillColor: Colors.grey[200],
-            hintText: "Type your query",
-            hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
-            prefixIcon: const Icon(Icons.search, color: Colors.black),
-            suffixIcon: GestureDetector(
-              onTap: () {
-                Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.speechToTextScreen).then(
-                  (value) {
-                    if (value != null) {
-                      searchController.clear();
-                      searchController.text = value.toString();
-                      setState(() => isSearching = true);
-                      ApiService.search(query: searchController.text).then((value) {
-                        setState(() {
-                          searchData = value;
-                          isSearching = false;
-                        });
-                      });
-                    }
-                  },
-                );
-              },
-              child: const Icon(Icons.mic, color: Colors.blue),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
-          child: TabBar(
-            labelColor: Colors.grey[600],
-            indicatorColor: Colors.purple,
-            controller: tabController,
-            tabs: tabList,
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: tabController,
-        children: [
-          searchedSongsWidget(),
-          searchedPlaylistsWidget(),
-          searchedArtistsWidget(),
-          searchedMVWidgets(),
-        ],
-      ),
-    );
   }
 
   searchedSongsWidget() {
@@ -329,5 +260,74 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                   );
                 },
               );
+  }
+
+  searchBarWidget() {
+    return TextFormField(
+      onChanged: (value) => fetchSearchData(),
+      controller: searchController,
+      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(0),
+        filled: true,
+        fillColor: Colors.grey[200],
+        hintText: "Type your query",
+        hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
+        prefixIcon: const Icon(Icons.search, color: Colors.black),
+        suffixIcon: GestureDetector(
+          onTap: () {
+            Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.speechToTextScreen).then(
+              (value) {
+                if (value != null) {
+                  searchController.clear();
+                  searchController.text = value.toString();
+                  setState(() => isSearching = true);
+                  ApiService.search(query: searchController.text).then((value) {
+                    setState(() {
+                      searchData = value;
+                      isSearching = false;
+                    });
+                  });
+                }
+              },
+            );
+          },
+          child: const Icon(Icons.mic, color: Colors.blue),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(25),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: searchBarWidget(),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: TabBar(
+            labelColor: Colors.grey[600],
+            indicatorColor: Colors.purple,
+            controller: tabController,
+            tabs: tabList,
+          ),
+        ),
+      ),
+      body: TabBarView(
+        controller: tabController,
+        children: [
+          searchedSongsWidget(),
+          searchedPlaylistsWidget(),
+          searchedArtistsWidget(),
+          searchedMVWidgets(),
+        ],
+      ),
+    );
   }
 }

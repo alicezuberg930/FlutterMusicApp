@@ -1,7 +1,7 @@
 name: flutter_music_app
-description: A new Flutter project.
+description: A flutter application for playing music online from zing mp3 api and offline storage.
 publish_to: "none"
-version: 0.2.0
+version: 0.3.0
 
 environment:
   sdk: ">=2.19.2 <3.0.0"
@@ -10,7 +10,6 @@ dependencies:
   just_audio: ^0.9.37
   rxdart: ^0.27.5
   dio: ^5.0.0
-  # dio_http_cache_lts: ^0.4.1
   permission_handler: ^9.2.0
   file_picker: ^8.0.0+1
   flutter_downloader: ^1.11.7

@@ -3,9 +3,6 @@ import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/top100.dart';
 import 'package:flutter_music_app/screens/local_audio_screen.dart';
-import 'package:flutter_music_app/screens/new_release_screen.dart';
-import 'package:flutter_music_app/screens/search_screen.dart';
-import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
@@ -61,11 +58,12 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(height: 10),
           newReleaseSongs.isNotEmpty
               ? ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
                   separatorBuilder: (context, index) => const SizedBox(height: 15),
                   shrinkWrap: true,
                   itemCount: newReleaseSongs.length,
                   itemBuilder: (context, index) {
-                    if (index <= 4) {
+                    if (index <= 9) {
                       return SongCard(isOnline: true, index: index, songs: newReleaseSongs);
                     }
                     return null;

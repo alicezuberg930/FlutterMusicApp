@@ -1,4 +1,6 @@
 import 'package:flutter_music_app/models/artist.dart';
+import 'package:flutter_music_app/models/composer.dart';
+import 'package:flutter_music_app/models/genre.dart';
 import 'package:flutter_music_app/models/song.dart';
 
 class Video extends Song {
@@ -7,6 +9,9 @@ class Video extends Song {
   Artist? artist;
   int? like;
   String? lyrics;
+  List<Genre> genres = [];
+  Song? song;
+  List<Composer> composers = [];
 
   Video({
     String? encodeId,
@@ -26,6 +31,9 @@ class Video extends Song {
     this.artist,
     this.like,
     this.lyrics,
+    required this.genres,
+    this.song,
+    required this.composers,
   }) : super(
           encodeId: encodeId,
           title: title,
@@ -44,10 +52,12 @@ class Video extends Song {
   factory Video.fromJson(Map<String, dynamic> json) {
     List<Artist> tempArtists = [];
     List<Video> tempVideos = [];
+    List<Genre> tempGenres = [];
+    List<Composer> tempComposers = [];
     if (json['artists'].isNotEmpty) json['artists'].forEach((artist) => tempArtists.add(Artist.fromJson(artist)));
-    if (json['recommends'] != null && json['recommends'].isNotEmpty) {
-      json['recommends'].forEach((recommend) => tempVideos.add(Video.fromJson(recommend)));
-    }
+    if (json['recommends'] != null && json['recommends'].isNotEmpty) json['recommends'].forEach((recommend) => tempVideos.add(Video.fromJson(recommend)));
+    if (json['genres'] != null && json['genres'].isNotEmpty) json['genres'].forEach((genre) => tempGenres.add(Genre.fromJson(genre)));
+    if (json['composers'] != null && json['composers'].isNotEmpty) json['composers'].forEach((composer) => tempComposers.add(Composer.fromJson(composer)));
 
     return Video(
       encodeId: json['encodeId'],
@@ -66,12 +76,36 @@ class Video extends Song {
       streaming: json['streaming']?['mp4'],
       artist: Artist.fromJson(json['artist']),
       like: json['like'],
-      lyrics: json['lyrics'] != null ? json['lyrics'][0]['content'] : null,
+      lyrics: json['lyrics'] != null ? json['lyrics'][0]['content'] : "No lyrics found",
+      genres: tempGenres,
+      song: json['song'] != null ? Song.fromJson(json['song']) : null,
+      composers: tempComposers,
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
     return super.toJson();
+  }
+
+  String get composerNames => getComposerNames();
+  String get genreNames => getGenreNames();
+
+  String getComposerNames() {
+    String composerNames = "";
+    for (int i = 0; i < composers.length; i++) {
+      composerNames += composers[i].name!;
+      if (i < composers.length - 1) composerNames += ", ";
+    }
+    return composerNames;
+  }
+
+  String getGenreNames() {
+    String genreNames = "";
+    for (int i = 0; i < genres.length; i++) {
+      genreNames += genres[i].name!;
+      if (i < genres.length - 1) genreNames += ", ";
+    }
+    return genreNames;
   }
 }

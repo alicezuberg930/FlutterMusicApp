@@ -84,7 +84,6 @@ class _SpeechToTextScreenState extends State<SpeechToTextScreen> {
                       } else {
                         startListening();
                         setState(() => isListening = true);
-                        // text = "";
                       }
                     },
                     iconSize: 60,

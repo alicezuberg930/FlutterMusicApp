@@ -6,7 +6,7 @@ import 'package:flutter_music_app/screens/home_screen.dart';
 import 'package:flutter_music_app/screens/new_release_screen.dart';
 import 'package:flutter_music_app/screens/playlist_details_screen.dart';
 import 'package:flutter_music_app/screens/search_screen.dart';
-import 'package:flutter_music_app/screens/speech_to_text_scree.dart';
+import 'package:flutter_music_app/screens/speech_to_text_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/screens/video_player_screen.dart';
 

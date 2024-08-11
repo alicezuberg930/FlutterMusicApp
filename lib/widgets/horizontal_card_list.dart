@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/playlist.dart';
-import 'package:flutter_music_app/screens/playlist_details_screen.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
 
 class HorizontalCardList extends StatelessWidget {
