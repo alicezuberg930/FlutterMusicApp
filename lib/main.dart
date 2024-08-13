@@ -4,6 +4,7 @@ import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/screens/home_screen.dart';
 import 'package:flutter_music_app/services/http_service.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
 void main() async {
@@ -31,7 +32,10 @@ class MainApp extends StatelessWidget {
       home: const HomeScreen(),
       title: "Flutter music app",
       theme: ThemeData(
-        textTheme: Theme.of(context).textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
+        textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
+        primaryTextTheme: GoogleFonts.robotoTextTheme(),
+        //   primarySwatch: Colors.green,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
     );

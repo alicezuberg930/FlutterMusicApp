@@ -149,7 +149,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                     onTap: () {
                       Constants.navigatorKey!.currentState!.pushNamed(
                         RouteGeneratorService.artistDetailsScreen,
-                        arguments: {'encodeId': searchData!.artists[index].id!},
+                        arguments: {'alias': searchData!.artists[index].alias},
                       );
                     },
                     child: Row(

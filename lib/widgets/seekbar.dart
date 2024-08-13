@@ -33,7 +33,10 @@ class _SeekBarState extends State<SeekBar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(Utils.formatDuration(widget.position)),
+        Text(
+          Utils.formatDuration(widget.position),
+          style: const TextStyle(color: Colors.white),
+        ),
         Expanded(
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -71,7 +74,10 @@ class _SeekBarState extends State<SeekBar> {
             ),
           ),
         ),
-        Text(Utils.formatDuration(widget.duration)),
+        Text(
+          Utils.formatDuration(widget.duration),
+          style: const TextStyle(color: Colors.white),
+        ),
       ],
     );
   }

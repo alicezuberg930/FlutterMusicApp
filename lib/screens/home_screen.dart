@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
+import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/song.dart';
-import 'package:flutter_music_app/models/top100.dart';
+import 'package:flutter_music_app/models/section.dart';
 import 'package:flutter_music_app/screens/local_audio_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
-import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
+import 'package:flutter_music_app/widgets/playlist_list.dart';
 import 'package:flutter_music_app/widgets/minimize_current_song.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
   PageController pageController = PageController();
   int selectedIndex = 0;
   List<Song> newReleaseSongs = [];
-  List<Top100> top100s = [];
+  List<Section> top100s = [];
   ApiService apiService = ApiService();
 
   @override
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   getTop100Playlist() async {
-    List<Top100>? temp = await ApiService.getTop100();
+    List<Section>? temp = await ApiService.getTop100();
     setState(() => top100s = temp);
   }
 
@@ -49,11 +50,14 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           InkWell(
             onTap: () {
               Constants.navigatorKey!.currentState!.pushNamed(
-                RouteGeneratorService.newReleaseScreen,
+                RouteGeneratorService.allSongScreen,
                 arguments: {'songs': newReleaseSongs},
               );
             },
-            child: const SectionHeader(title: 'New release'),
+            child: SectionHeader(
+              title: 'New release',
+              action: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+            ),
           ),
           const SizedBox(height: 10),
           newReleaseSongs.isNotEmpty
@@ -87,10 +91,13 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
                 arguments: {'top100s': top100s},
               );
             },
-            child: const SectionHeader(title: 'Top 100'),
+            child: SectionHeader(
+              title: 'Top 100',
+              action: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+            ),
           ),
           const SizedBox(height: 10),
-          top100s.isNotEmpty ? HorizontalCardList(playlists: top100s[0].items) : const CircularProgressIndicator(color: Colors.purple),
+          top100s.isNotEmpty ? PlaylistList(playlists: top100s[0].items as List<Playlist>) : const CircularProgressIndicator(color: Colors.purple)
         ],
       ),
     );
@@ -134,60 +141,47 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.deepPurple.shade200.withOpacity(0.8),
-            Colors.deepPurple.shade100.withOpacity(0.8),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.purple[300],
+        elevation: 0,
+        leading: const Icon(Icons.grid_view_rounded),
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.searchScreen);
+            },
+            child: const Icon(Icons.search),
+          ),
+          const SizedBox(width: 15),
+          const CircleAvatar(
+            radius: 20,
+            backgroundImage: NetworkImage('https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg'),
+          ),
+          const SizedBox(width: 15),
+        ],
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: const Icon(Icons.grid_view_rounded),
-          actions: [
-            GestureDetector(
-              onTap: () async {
-                Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.searchScreen);
-              },
-              child: const Icon(Icons.search),
+      bottomNavigationBar: customNavigationBar(),
+      body: PageView(
+        controller: pageController,
+        onPageChanged: (value) {
+          setState(() => selectedIndex = value);
+        },
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                newReleaseSongsWidget(),
+                top100PlaylistWidget(),
+              ],
             ),
-            const SizedBox(width: 15),
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage('https://i.pinimg.com/736x/9d/a3/b0/9da3b06254942ad9bc0287d425dd0c70.jpg'),
-            ),
-            const SizedBox(width: 15),
-          ],
-        ),
-        bottomNavigationBar: customNavigationBar(),
-        body: PageView(
-          controller: pageController,
-          onPageChanged: (value) {
-            setState(() => selectedIndex = value);
-          },
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  newReleaseSongsWidget(),
-                  top100PlaylistWidget(),
-                ],
-              ),
-            ),
-            const Text("Favorite"),
-            const LocalAudioScreen(),
-            const Text("Profile"),
-          ],
-        ),
-        bottomSheet: Constants.audioPlayer.currentIndex != null ? const MinimizeCurrentSong() : null,
+          ),
+          const Text("Favorite"),
+          const LocalAudioScreen(),
+          const Text("Profile"),
+        ],
       ),
+      bottomSheet: Constants.audioPlayer.currentIndex != null ? const MinimizeCurrentSong() : null,
     );
   }
 }

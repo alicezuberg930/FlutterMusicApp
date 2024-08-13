@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_music_app/models/top100.dart';
-import 'package:flutter_music_app/widgets/horizontal_card_list.dart';
+import 'package:flutter_music_app/models/playlist.dart';
+import 'package:flutter_music_app/models/section.dart';
+import 'package:flutter_music_app/widgets/playlist_list.dart';
 import 'package:flutter_music_app/widgets/section_header.dart';
 
 class Top100PlaylistsScreen extends StatefulWidget {
-  final List<Top100> top100s;
+  final List<Section> top100s;
   const Top100PlaylistsScreen({super.key, required this.top100s});
 
   @override
@@ -31,10 +32,10 @@ class _Top100PlaylistsScreenState extends State<Top100PlaylistsScreen> {
               children: [
                 InkWell(
                   onTap: () {},
-                  child: SectionHeader(title: widget.top100s[index].title!, action: '', color: Colors.black),
+                  child: SectionHeader(title: widget.top100s[index].title!),
                 ),
                 const SizedBox(height: 10),
-                HorizontalCardList(playlists: widget.top100s[index].items),
+                PlaylistList(playlists: widget.top100s[index].items as List<Playlist>),
               ],
             );
           },

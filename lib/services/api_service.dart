@@ -1,10 +1,11 @@
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/common/utils.dart';
+import 'package:flutter_music_app/models/artist.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/models/song.dart';
-import 'package:flutter_music_app/models/top100.dart';
+import 'package:flutter_music_app/models/section.dart';
 import 'package:flutter_music_app/models/video.dart';
 import 'package:flutter_music_app/services/http_service.dart';
 
@@ -15,6 +16,7 @@ class ApiService {
   static String playlistEndpoint = "/api/v2/page/get/playlist";
   static String streamingEndpoint = "/api/v2/song/get/streaming";
   static String videoEndpoint = "/api/v2/page/get/video";
+  static String artistEndpoint = "/api/v2/page/get/artist";
 
   static Future<Search?> search({required String query}) async {
     try {
@@ -62,15 +64,15 @@ class ApiService {
     }
   }
 
-  static Future<List<Top100>> getTop100() async {
+  static Future<List<Section>> getTop100() async {
     try {
       final response = await HttpService.get(
         "${Constants.apiUrl}$top100Endpoint",
         queryParameters: {"sig": Utils.hashParamNoId(top100Endpoint)},
       );
       if (response.data['err'] == 0) {
-        List<Top100> top100s = [];
-        response.data["data"].forEach((item) => top100s.add(Top100.fromJson(item)));
+        List<Section> top100s = [];
+        response.data["data"].forEach((item) => top100s.add(Section.fromJson(item)));
         return top100s;
       } else if (response.data['err'] != 0) {
         UIHelpers.showSnackBar(message: response.data['msg']);
@@ -135,6 +137,27 @@ class ApiService {
       );
       if (response.data['err'] == 0) {
         return Video.fromJson(response.data['data']);
+      } else if (response.data['err'] != 0) {
+        UIHelpers.showSnackBar(message: response.data['msg']);
+        return null;
+      } else {
+        UIHelpers.showSnackBar(message: response.data['msg']);
+        return null;
+      }
+    } catch (e) {
+      UIHelpers.showSnackBar(message: e.toString());
+      return null;
+    }
+  }
+
+  static Future<Artist?> getArtist({required String name}) async {
+    try {
+      final response = await HttpService.get(
+        "${Constants.apiUrl}$artistEndpoint",
+        queryParameters: {"alias": name, "sig": Utils.hashParamNoId(artistEndpoint)},
+      );
+      if (response.data['err'] == 0) {
+        return Artist.fromJson(response.data['data']);
       } else if (response.data['err'] != 0) {
         UIHelpers.showSnackBar(message: response.data['msg']);
         return null;

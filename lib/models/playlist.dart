@@ -11,6 +11,7 @@ class Playlist {
   String? thumbnailM;
   int? contentLastUpdate;
   List<Song> songs = [];
+  String? releaseDate;
 
   Playlist({
     this.encodeId,
@@ -22,6 +23,7 @@ class Playlist {
     this.thumbnailM,
     this.contentLastUpdate,
     required this.songs,
+    this.releaseDate,
   });
 
   factory Playlist.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class Playlist {
       thumbnailM: json['thumbnailM'],
       contentLastUpdate: json['contentLastUpdate'],
       songs: tempSongs,
+      releaseDate: json['releaseDate'],
     );
   }
 }
