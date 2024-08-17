@@ -345,12 +345,14 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
         Section section = artist!.sections![index];
         return Column(
           children: [
-            if (section.sectionId == "aSongs") ...[outstandingSongsWidget(section)],
-            if (section.sectionId == "aSingle") ...[singleEPPlaylistsWidget(section)],
-            if (section.sectionId == "aAlbum") ...[albumWidget(section)],
-            if (section.sectionId == "aMV") ...[musicVideoWidget(section)],
-            if (section.sectionId == "aPlaylist") ...[playlistsWidget(section)],
-            if (section.sectionId == "aReArtist") ...[artistsYouMayLikeWidget(section)],
+            if (section.items.isNotEmpty) ...[
+              if (section.sectionId == "aSongs") ...[outstandingSongsWidget(section)],
+              if (section.sectionId == "aSingle") ...[singleEPPlaylistsWidget(section)],
+              if (section.sectionId == "aAlbum") ...[albumWidget(section)],
+              if (section.sectionId == "aMV") ...[musicVideoWidget(section)],
+              if (section.sectionId == "aPlaylist") ...[playlistsWidget(section)],
+              if (section.sectionId == "aReArtist") ...[artistsYouMayLikeWidget(section)],
+            ],
           ],
         );
       },
@@ -360,11 +362,62 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: artist != null
-            ? SingleChildScrollView(
-                child: Padding(
+      body: artist != null
+          ? CustomScrollView(
+              shrinkWrap: true,
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.white,
+                  pinned: true,
+                  snap: false,
+                  floating: false,
+                  expandedHeight: 350,
+                  actions: [
+                    IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+                  ],
+                  iconTheme: const IconThemeData(color: Colors.black),
+                  flexibleSpace: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Calculate the opacity of the title based on the collapse percentage
+                      final double opacity = (constraints.maxHeight - kToolbarHeight) / (350 - kToolbarHeight);
+                      return FlexibleSpaceBar(
+                        title: Opacity(
+                          opacity: 1 - opacity.clamp(0.0, 1.0), // Title is hidden when opacity is 0
+                          child: Text(artist!.name!),
+                        ),
+                        background: Stack(
+                          alignment: Alignment.bottomLeft,
+                          children: [
+                            Image.network(
+                              artist!.thumbnailM!,
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(25),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    artist!.name!,
+                                    style: const TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "${(artist!.totalFollow ?? 0).toString()} followers",
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SliverToBoxAdapter(
+                    child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     children: [
@@ -373,10 +426,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                       informationWidget(),
                     ],
                   ),
-                ),
-              )
-            : const Center(child: CircularProgressIndicator(color: Colors.purple)),
-      ),
+                )),
+              ],
+            )
+          : const Center(child: CircularProgressIndicator(color: Colors.purple)),
     );
   }
 }

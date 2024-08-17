@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/section.dart';
+import 'package:flutter_music_app/screens/home_screen/cubit/home_cubit.dart';
 import 'package:flutter_music_app/screens/local_audio_screen.dart';
-import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/playlist_list.dart';
 import 'package:flutter_music_app/widgets/minimize_current_song.dart';
@@ -14,6 +15,13 @@ import 'package:flutter_music_app/widgets/song_card.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  static BlocProvider<HomeCubit> provider() {
+    return BlocProvider(
+      create: (context) => HomeCubit(),
+      child: const HomeScreen(),
+    );
+  }
+
   @override
   State<HomeScreen> createState() => _HomePageState();
 }
@@ -21,28 +29,14 @@ class HomeScreen extends StatefulWidget {
 class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
   PageController pageController = PageController();
   int selectedIndex = 0;
-  List<Song> newReleaseSongs = [];
-  List<Section> top100s = [];
-  ApiService apiService = ApiService();
 
   @override
   void initState() {
-    getHome();
-    getTop100Playlist();
+    context.read<HomeCubit>().getHome();
     super.initState();
   }
 
-  getHome() async {
-    List<Song> temp = await ApiService.getHome();
-    setState(() => newReleaseSongs = temp);
-  }
-
-  getTop100Playlist() async {
-    List<Section>? temp = await ApiService.getTop100();
-    setState(() => top100s = temp);
-  }
-
-  newReleaseSongsWidget() {
+  newReleaseSongsWidget(List<Song> newReleaseSongs) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
@@ -73,13 +67,13 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
                     return null;
                   },
                 )
-              : const CircularProgressIndicator(color: Colors.purple),
+              : const Text("No Songs Found"),
         ],
       ),
     );
   }
 
-  top100PlaylistWidget() {
+  top100PlaylistWidget(List<Section> top100s) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
@@ -97,7 +91,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(height: 10),
-          top100s.isNotEmpty ? PlaylistList(playlists: top100s[0].items as List<Playlist>) : const CircularProgressIndicator(color: Colors.purple)
+          top100s.isNotEmpty ? PlaylistList(playlists: top100s[0].items as List<Playlist>) : const Text("No Songs Found"),
         ],
       ),
     );
@@ -171,8 +165,26 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           SingleChildScrollView(
             child: Column(
               children: [
-                newReleaseSongsWidget(),
-                top100PlaylistWidget(),
+                BlocBuilder<HomeCubit, HomeState>(
+                  builder: (context, state) {
+                    if (state is IsLoadingState) {
+                      return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                    }
+                    if (state is GetHomeState) {
+                      return newReleaseSongsWidget(state.homeSongs);
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                BlocBuilder<HomeCubit, HomeState>(
+                  builder: (context, state) {
+                    if (state is IsLoadingState) {
+                      return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                    }
+                    if (state is GetHomeState) return top100PlaylistWidget(state.top100s);
+                    return const SizedBox.shrink();
+                  },
+                ),
               ],
             ),
           ),

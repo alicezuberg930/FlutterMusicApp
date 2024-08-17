@@ -2,6 +2,7 @@ import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/artist.dart';
+import 'package:flutter_music_app/models/lyrics.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/search.dart';
 import 'package:flutter_music_app/models/song.dart';
@@ -17,6 +18,7 @@ class ApiService {
   static String streamingEndpoint = "/api/v2/song/get/streaming";
   static String videoEndpoint = "/api/v2/page/get/video";
   static String artistEndpoint = "/api/v2/page/get/artist";
+  static String lyricsEndpoint = "/api/v2/lyric/get/lyric";
 
   static Future<Search?> search({required String query}) async {
     try {
@@ -158,6 +160,27 @@ class ApiService {
       );
       if (response.data['err'] == 0) {
         return Artist.fromJson(response.data['data']);
+      } else if (response.data['err'] != 0) {
+        UIHelpers.showSnackBar(message: response.data['msg']);
+        return null;
+      } else {
+        UIHelpers.showSnackBar(message: response.data['msg']);
+        return null;
+      }
+    } catch (e) {
+      UIHelpers.showSnackBar(message: e.toString());
+      return null;
+    }
+  }
+
+  static Future<Lyrics?> getLyrics({required String encodeId}) async {
+    try {
+      final response = await HttpService.get(
+        "${Constants.apiUrl}$lyricsEndpoint",
+        queryParameters: {"id": encodeId, "sig": Utils.hashParamWithId(lyricsEndpoint, encodeId)},
+      );
+      if (response.data['err'] == 0) {
+        return Lyrics.fromJson(response.data['data']);
       } else if (response.data['err'] != 0) {
         UIHelpers.showSnackBar(message: response.data['msg']);
         return null;

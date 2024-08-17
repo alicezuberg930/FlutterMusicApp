@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -6,9 +8,38 @@ import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 class Utils {
-  static Future<void> downloadFile(String url, String fileName) async {
+  static Future downloadLyrics(String url, String fileName) async {
+    Directory? appDocDir = await getDownloadsDirectory();
+    String lyricsFolder = "${appDocDir!.path}/lyrics";
+    PermissionStatus isStorageAllowed = await Permission.manageExternalStorage.request();
+    final folder = Directory(lyricsFolder);
+    // Check if the folder exists, and if not, create it
+    if (await folder.exists() == false) await folder.create(recursive: true);
+    if (await File("$lyricsFolder/$fileName").exists()) return;
+    // if storage permission is granted
+    if (isStorageAllowed.isGranted) {
+      try {
+        String? taskId = await FlutterDownloader.enqueue(
+          url: url,
+          savedDir: lyricsFolder,
+          requiresStorageNotLow: true,
+          fileName: fileName,
+          showNotification: true,
+          openFileFromNotification: false,
+        );
+        UIHelpers.showSnackBar(color: Colors.green, message: taskId!);
+      } catch (e) {
+        UIHelpers.showSnackBar(message: e.toString());
+      }
+    } else {
+      openAppSettings();
+    }
+  }
+
+  static Future downloadFile(String url, String fileName) async {
     PermissionStatus isStorageAllowed = await Permission.manageExternalStorage.request();
     // if storage permission is granted
     if (isStorageAllowed.isGranted) {

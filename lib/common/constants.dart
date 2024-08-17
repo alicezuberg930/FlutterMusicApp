@@ -4,7 +4,7 @@ import 'package:just_audio/just_audio.dart';
 class Constants {
   static String apiUrl = "https://zingmp3.vn/";
   static GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-  static AudioPlayer audioPlayer = AudioPlayer();
+  static late AudioPlayer audioPlayer;
   static String defaultAudio = "https://cdn.pixabay.com/download/audio/2022/03/23/audio_4ce5f46cbd.mp3?filename=nature-99499.mp3";
   static String defaultVideo = "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4";
   static String zingMP3Version = "1.6.34";

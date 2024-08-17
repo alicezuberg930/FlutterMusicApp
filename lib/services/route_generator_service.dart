@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/section.dart';
 import 'package:flutter_music_app/screens/artist_details_screen.dart';
-import 'package:flutter_music_app/screens/home_screen.dart';
 import 'package:flutter_music_app/screens/all_song_screen.dart';
+import 'package:flutter_music_app/screens/home_screen/home_screen.dart';
 import 'package:flutter_music_app/screens/playlist_details_screen.dart';
 import 'package:flutter_music_app/screens/search_screen.dart';
 import 'package:flutter_music_app/screens/speech_to_text_screen.dart';
@@ -26,7 +26,7 @@ class RouteGeneratorService {
       case artistDetailsScreen:
         return pageRouteBuilder(ArtistDetailsScreen(alias: map['alias'] as String), settings);
       case homeScreen:
-        return pageRouteBuilder(const HomeScreen(), settings);
+        return pageRouteBuilder(HomeScreen.provider(), settings);
       case allSongScreen:
         return pageRouteBuilder(AllSongScreen(songs: map['songs'] as List<Song>), settings);
       case playlistDetailsScreen:

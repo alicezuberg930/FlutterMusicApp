@@ -16,7 +16,7 @@ class Section {
     List<Video> tempVideos = [];
     List<Artist> tempArtist = [];
 
-    if (json["items"].isNotEmpty) {
+    if (json["items"] != null && json["items"].isNotEmpty) {
       for (var item in (json['items'] as List)) {
         if (json['sectionType'] == "playlist") tempPlaylists.add(Playlist.fromJson(item));
         if (json['sectionType'] == "song") tempSongs.add(Song.fromJson(item));

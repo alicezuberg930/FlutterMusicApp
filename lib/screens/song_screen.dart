@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
+import 'package:flutter_music_app/screens/lyrics_screen.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/seekbar.dart';
 import 'package:just_audio/just_audio.dart';
@@ -25,9 +26,9 @@ class SongScreen extends StatefulWidget {
   State<SongScreen> createState() => _SongPageState();
 }
 
-class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMixin {
+class _SongPageState extends State<SongScreen> with TickerProviderStateMixin {
   int songIndex = 0;
-  Stream<SeekBarData> seekBarDataStream = rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
+  Stream<SeekBarData>? seekBarDataStream = rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
     Constants.audioPlayer.positionStream,
     Constants.audioPlayer.durationStream,
     (Duration position, Duration? duration) {
@@ -36,15 +37,21 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
         duration: duration ?? Duration.zero,
       );
     },
-  );
+  ).asBroadcastStream();
   late StreamSubscription<SequenceState?> streamSubscription;
   String? currentQ128;
   bool isLoop = false;
   late AnimationController animationController;
   Uint8List? offlineImg;
+  List<Tab> tabList = const [
+    Tab(child: Divider(color: Colors.pink)),
+    Tab(child: Divider(color: Colors.pink)),
+  ];
+  TabController? tabController;
 
   @override
   void initState() {
+    tabController = TabController(length: tabList.length, vsync: this);
     animationController = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
@@ -69,6 +76,7 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
   void dispose() {
     animationController.dispose();
     streamSubscription.cancel();
+    tabController?.dispose();
     super.dispose();
   }
 
@@ -191,8 +199,9 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
 
   musicPlayerWidget() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      padding: const EdgeInsets.all(20),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -230,6 +239,20 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
                 iconSize: 30,
                 color: Colors.white,
                 icon: const Icon(Icons.thumb_up),
+              ),
+              IconButton(
+                onPressed: () async {
+                  // await getLyrics();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LyricsScreen(song: widget.song[songIndex]),
+                    ),
+                  );
+                },
+                iconSize: 30,
+                color: Colors.white,
+                icon: const Icon(Icons.lyrics),
               ),
               IconButton(
                 onPressed: () async {
@@ -384,14 +407,35 @@ class _SongPageState extends State<SongScreen> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.purple,
       extendBodyBehindAppBar: true,
-      body: Stack(
-        alignment: Alignment.topCenter,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(3),
+        child: Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.only(top: 20),
+          width: 50,
+          child: TabBar(
+            isScrollable: true,
+            indicatorColor: Colors.amber,
+            controller: tabController,
+            tabs: tabList,
+          ),
+        ),
+      ),
+      body: TabBarView(
+        controller: tabController,
         children: [
-          backgroundFilter(),
-          musicBackgroundWidget(),
-          exitButtonWidget(),
-          musicPlayerWidget(),
+          Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              backgroundFilter(),
+              musicBackgroundWidget(),
+              exitButtonWidget(),
+              musicPlayerWidget(),
+            ],
+          ),
+          LyricsScreen(song: widget.song[songIndex]),
         ],
       ),
     );
