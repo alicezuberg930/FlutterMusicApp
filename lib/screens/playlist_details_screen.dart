@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/services/api_service.dart';
-import 'package:flutter_music_app/widgets/seekbar.dart';
+import 'package:flutter_music_app/widgets/minimize_current_song.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:rxdart/rxdart.dart' as rxdart;
 
 class PlayListDetailsScreen extends StatefulWidget {
   final String encodeId;
@@ -19,17 +18,6 @@ class PlayListDetailsScreen extends StatefulWidget {
 class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
   Playlist? playlist;
   String? totalTime;
-  AudioPlayer audioPlayer = AudioPlayer();
-  Stream<SeekBarData> get seekBarDataStream => rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
-        audioPlayer.positionStream,
-        audioPlayer.durationStream,
-        (Duration position, Duration? duration) {
-          return SeekBarData(
-            position: position,
-            duration: duration ?? Duration.zero,
-          );
-        },
-      );
 
   @override
   void initState() {
@@ -50,6 +38,7 @@ class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // bottomSheet: const MinimizeCurrentSong(),
       body: SafeArea(
         child: playlist == null
             ? const Center(child: CircularProgressIndicator(color: Colors.purple))
@@ -57,7 +46,7 @@ class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
                 ? const Center(child: Text("No songs found"))
                 : SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: Constants.audioPlayer.sequence != null ? 90 : 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [

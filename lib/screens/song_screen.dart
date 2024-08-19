@@ -242,20 +242,6 @@ class _SongPageState extends State<SongScreen> with TickerProviderStateMixin {
               ),
               IconButton(
                 onPressed: () async {
-                  // await getLyrics();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LyricsScreen(song: widget.song[songIndex]),
-                    ),
-                  );
-                },
-                iconSize: 30,
-                color: Colors.white,
-                icon: const Icon(Icons.lyrics),
-              ),
-              IconButton(
-                onPressed: () async {
                   if (widget.song[songIndex].link != null) {
                     await Share.share("${Constants.apiUrl}${widget.song[songIndex].link!.substring(1)}", subject: "Look at this song");
                   }
@@ -435,7 +421,7 @@ class _SongPageState extends State<SongScreen> with TickerProviderStateMixin {
               musicPlayerWidget(),
             ],
           ),
-          LyricsScreen(song: widget.song[songIndex]),
+          LyricsScreen(song: widget.song[songIndex], isOnline: widget.isOnline!),
         ],
       ),
     );

@@ -163,29 +163,32 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
         },
         children: [
           SingleChildScrollView(
-            child: Column(
-              children: [
-                BlocBuilder<HomeCubit, HomeState>(
-                  builder: (context, state) {
-                    if (state is IsLoadingState) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.purple));
-                    }
-                    if (state is GetHomeState) {
-                      return newReleaseSongsWidget(state.homeSongs);
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-                BlocBuilder<HomeCubit, HomeState>(
-                  builder: (context, state) {
-                    if (state is IsLoadingState) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.purple));
-                    }
-                    if (state is GetHomeState) return top100PlaylistWidget(state.top100s);
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
+            child: Padding(
+              padding: EdgeInsets.only(bottom: Constants.audioPlayer.sequence != null ? 80 : 0),
+              child: Column(
+                children: [
+                  BlocBuilder<HomeCubit, HomeState>(
+                    builder: (context, state) {
+                      if (state is IsLoadingState) {
+                        return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                      }
+                      if (state is GetHomeState) {
+                        return newReleaseSongsWidget(state.homeSongs);
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                  BlocBuilder<HomeCubit, HomeState>(
+                    builder: (context, state) {
+                      if (state is IsLoadingState) {
+                        return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                      }
+                      if (state is GetHomeState) return top100PlaylistWidget(state.top100s);
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           const Text("Favorite"),
@@ -193,7 +196,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           const Text("Profile"),
         ],
       ),
-      bottomSheet: Constants.audioPlayer.currentIndex != null ? const MinimizeCurrentSong() : null,
+      // bottomSheet: const MinimizeCurrentSong(),
     );
   }
 }

@@ -54,6 +54,7 @@ class Song {
       "encodeId": encodeId,
       "title": title,
       "artistsNames": artistsNames,
+      "thumbnail": thumbnail,
       "thumbnailM": thumbnailM,
       "link": link,
       "duration": duration,

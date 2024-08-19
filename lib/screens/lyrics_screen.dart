@@ -5,20 +5,21 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
-import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/lyrics.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/services/api_service.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 import 'package:lyrics_parser/lyrics_parser.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:lyrics_parser/src/models.dart';
 
 class LyricsScreen extends StatefulWidget {
   final Song song;
-  const LyricsScreen({super.key, required this.song});
+  final bool isOnline;
+  const LyricsScreen({super.key, required this.song, required this.isOnline});
 
   @override
   State<LyricsScreen> createState() => _LyricsScreenState();
@@ -30,7 +31,7 @@ class _LyricsScreenState extends State<LyricsScreen> {
   final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
   final ScrollOffsetListener scrollOffsetListener = ScrollOffsetListener.create();
   List<LcrLyric> lyricsList = [];
-  late StreamSubscription lyricsStream;
+  StreamSubscription? lyricsStream;
   bool? isLoading;
 
   @override
@@ -41,24 +42,33 @@ class _LyricsScreenState extends State<LyricsScreen> {
 
   @override
   void dispose() {
-    lyricsStream.cancel();
+    lyricsStream?.cancel();
     super.dispose();
   }
 
   getLyrics() async {
     setState(() => isLoading = true);
-    Lyrics? lyrics = await ApiService.getLyrics(encodeId: widget.song.encodeId!);
-    if (lyrics!.file == null) {
+    String name = "${widget.song.artistsNames}-${widget.song.title}.lcr";
+    Directory? appDocDir = await getDownloadsDirectory();
+    File file = File("${appDocDir!.path}/lyrics/$name");
+    if (widget.isOnline && !file.existsSync()) {
+      Lyrics? lyrics = await ApiService.getLyrics(encodeId: widget.song.encodeId!);
+      if (lyrics!.file == null) {
+        setState(() {
+          isLoading = false;
+          lyricsList = [];
+        });
+        return;
+      }
+      await Utils.downloadLyrics(lyrics.file!, name);
+    }
+    if (!file.existsSync()) {
       setState(() {
         isLoading = false;
         lyricsList = [];
       });
       return;
     }
-    String name = "${widget.song.artistsNames}-${widget.song.title}.lcr";
-    await Utils.downloadLyrics(lyrics.file!, name);
-    Directory? appDocDir = await getDownloadsDirectory();
-    File file = File("${appDocDir!.path}/lyrics/$name");
     LyricsParser parser = LyricsParser.fromFile(file);
     await parser.ready();
     LcrLyrics result = await parser.parse();
@@ -112,28 +122,40 @@ class _LyricsScreenState extends State<LyricsScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image(
-                    image: Image.network(widget.song.thumbnail!).image,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
+                  child: widget.isOnline
+                      ? Image(
+                          image: Image.network(widget.song.thumbnail!).image,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        )
+                      : QueryArtworkWidget(
+                          id: int.parse(widget.song.encodeId!),
+                          type: ArtworkType.AUDIO,
+                          quality: 100,
+                          artworkWidth: 50,
+                          artworkHeight: 50,
+                        ),
                 ),
                 const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.song.title!,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      widget.song.artistsNames!,
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.5)),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.song.title!,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        widget.song.artistsNames!,
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.5)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
