@@ -110,4 +110,12 @@ class Utils {
       Constants.secretKey,
     );
   }
+
+  static String formatNumber(int number) {
+    String formattedNumber = "";
+    if (number > 10000) formattedNumber = "${(number / 1000).toStringAsFixed(1)}k";
+    if (number > 1000000) formattedNumber = "${(number / 1000000).toStringAsFixed(1)}m";
+    if (number > 1000000000) formattedNumber = "${(number / 1000000000).toStringAsFixed(1)}b";
+    return formattedNumber;
+  }
 }

@@ -38,7 +38,7 @@ class _PlayListDetailsScreenState extends State<PlayListDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // bottomSheet: const MinimizeCurrentSong(),
+      bottomSheet: const MinimizeCurrentSong(),
       body: SafeArea(
         child: playlist == null
             ? const Center(child: CircularProgressIndicator(color: Colors.purple))

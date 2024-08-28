@@ -37,9 +37,10 @@ class _MinimizeCurrentSongState extends State<MinimizeCurrentSong> with TickerPr
   @override
   void initState() {
     songIndex = audioPlayer.currentIndex ?? 0;
-    streamSubscription = audioPlayer.sequenceStateStream.listen((event) {
-      if (event != null && event.currentIndex != songIndex) {
-        // setCurrentAudioSource(event.currentIndex);
+    streamSubscription = Constants.audioPlayer.sequenceStateStream.listen((event) {
+      if (event != null && event.currentIndex > songIndex!) {
+        songIndex = songIndex! + 1;
+        // setCurrentAudioSource();
       }
     });
     super.initState();
@@ -51,27 +52,27 @@ class _MinimizeCurrentSongState extends State<MinimizeCurrentSong> with TickerPr
     super.dispose();
   }
 
-  setCurrentAudioSource(int index) async {
-    // List<Song> playlist = SharedPreference.getCurrentPlaylist();
-    // String? currentQ128 = await ApiService.getStreaming(encodeId: playlist[index].encodeId!);
-    // await audioPlayer.setAudioSource(
-    //   ConcatenatingAudioSource(
-    //     children: [
-    //       for (Song song in playlist)
-    //         AudioSource.uri(
-    //           Uri.parse(currentQ128 ?? Constants.defaultAudio),
-    //           tag: MediaItem(
-    //             id: song.encodeId!,
-    //             album: "No album",
-    //             title: song.title!,
-    //             artist: song.artistsNames,
-    //             artUri: song.thumbnail != null ? Uri.parse(song.thumbnail!) : null,
-    //           ),
-    //         ),
-    //     ],
-    //   ),
-    //   initialIndex: index,
-    // );
+  setCurrentAudioSource() async {
+    List<Song> playlist = SharedPreference.getCurrentPlaylist();
+    String? currentQ128 = await ApiService.getStreaming(encodeId: playlist[songIndex!].encodeId!);
+    await audioPlayer.setAudioSource(
+      ConcatenatingAudioSource(
+        children: [
+          for (Song song in playlist)
+            AudioSource.uri(
+              Uri.parse(currentQ128 ?? Constants.defaultAudio),
+              tag: MediaItem(
+                id: song.encodeId!,
+                album: "No album",
+                title: song.title!,
+                artist: song.artistsNames,
+                artUri: song.thumbnail != null ? Uri.parse(song.thumbnail!) : null,
+              ),
+            ),
+        ],
+      ),
+      initialIndex: songIndex,
+    );
   }
 
   @override
@@ -171,7 +172,8 @@ class _MinimizeCurrentSongState extends State<MinimizeCurrentSong> with TickerPr
                           onPressed: () {
                             if (audioPlayer.hasPrevious) {
                               audioPlayer.seekToPrevious();
-                              setCurrentAudioSource(snapshot.data!.currentIndex);
+                              songIndex = songIndex! - 1;
+                              setCurrentAudioSource();
                             }
                           },
                           icon: const Icon(Icons.skip_previous),
@@ -227,7 +229,8 @@ class _MinimizeCurrentSongState extends State<MinimizeCurrentSong> with TickerPr
                           onPressed: () {
                             if (audioPlayer.hasNext) {
                               audioPlayer.seekToNext();
-                              setCurrentAudioSource(snapshot.data!.currentIndex);
+                              songIndex = songIndex! + 1;
+                              setCurrentAudioSource();
                             }
                           },
                           padding: EdgeInsets.zero,

@@ -33,7 +33,14 @@ class MainApp extends StatelessWidget {
       navigatorKey: Constants.navigatorKey,
       onGenerateRoute: RouteGeneratorService.generateRoute,
       scaffoldMessengerKey: Constants.rootScaffoldMessengerKey,
-      home: HomeScreen.provider(),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaleFactor: 1.0,
+          ),
+          child: child!,
+        );
+      },
       title: "Flutter music app",
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
@@ -42,6 +49,7 @@ class MainApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
+      initialRoute: RouteGeneratorService.homeScreen,
     );
   }
 }

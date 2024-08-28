@@ -4,6 +4,7 @@ import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/section.dart';
+import 'package:flutter_music_app/screens/home_screen/cubit/bottom_navigation_bar_cubit.dart';
 import 'package:flutter_music_app/screens/home_screen/cubit/home_cubit.dart';
 import 'package:flutter_music_app/screens/local_audio_screen.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
@@ -15,9 +16,12 @@ import 'package:flutter_music_app/widgets/song_card.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  static BlocProvider<HomeCubit> provider() {
-    return BlocProvider(
-      create: (context) => HomeCubit(),
+  static MultiBlocProvider provider() {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => HomeCubit()),
+        BlocProvider(create: (context) => BottomNavigationBarCubit()),
+      ],
       child: const HomeScreen(),
     );
   }
@@ -28,7 +32,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
   PageController pageController = PageController();
-  int selectedIndex = 0;
 
   @override
   void initState() {
@@ -99,7 +102,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
 
   customNavigationBar() {
     return BottomNavigationBar(
-      currentIndex: selectedIndex,
+      currentIndex: context.watch<BottomNavigationBarCubit>().state.index,
       onTap: (value) {
         pageController.animateToPage(
           value,
@@ -159,7 +162,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
       body: PageView(
         controller: pageController,
         onPageChanged: (value) {
-          setState(() => selectedIndex = value);
+          context.read<BottomNavigationBarCubit>().setBottomNavigationIndexState(value);
         },
         children: [
           SingleChildScrollView(
@@ -196,7 +199,7 @@ class _HomePageState extends State<HomeScreen> with TickerProviderStateMixin {
           const Text("Profile"),
         ],
       ),
-      // bottomSheet: const MinimizeCurrentSong(),
+      bottomSheet: const MinimizeCurrentSong(),
     );
   }
 }

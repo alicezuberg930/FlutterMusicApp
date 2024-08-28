@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable, use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/common/constants.dart';
+import 'package:flutter_music_app/common/shared_preference.dart';
 import 'package:flutter_music_app/common/ui_helpers.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/song.dart';
@@ -20,6 +21,7 @@ class SongCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
+        await SharedPreference.setCurrentPlaylist(songs!);
         if (isOnline!) songs![index].q128 = await ApiService.getStreaming(encodeId: songs![index].encodeId!) ?? Constants.apiUrl;
         showModalBottomSheet(
           useSafeArea: true,

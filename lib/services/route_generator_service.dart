@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/section.dart';
-import 'package:flutter_music_app/screens/artist_details_screen.dart';
+import 'package:flutter_music_app/screens/artist_details_screen/artist_details_screen.dart';
 import 'package:flutter_music_app/screens/all_song_screen.dart';
 import 'package:flutter_music_app/screens/home_screen/home_screen.dart';
 import 'package:flutter_music_app/screens/playlist_details_screen.dart';
-import 'package:flutter_music_app/screens/search_screen.dart';
+import 'package:flutter_music_app/screens/search_screen/search_screen.dart';
 import 'package:flutter_music_app/screens/speech_to_text_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
 import 'package:flutter_music_app/screens/video_player_screen.dart';
@@ -24,7 +24,11 @@ class RouteGeneratorService {
     Map<String, dynamic> map = settings.arguments != null ? settings.arguments as Map<String, dynamic> : {};
     switch (settings.name) {
       case artistDetailsScreen:
-        return pageRouteBuilder(ArtistDetailsScreen(alias: map['alias'] as String), settings);
+        // return MaterialPageRoute(
+        //   builder: (context) => ArtistDetailsScreen.provider(alias: map['alias'] as String),
+        //   settings: settings,
+        // );
+        return pageRouteBuilder(ArtistDetailsScreen.provider(alias: map['alias'] as String), settings);
       case homeScreen:
         return pageRouteBuilder(HomeScreen.provider(), settings);
       case allSongScreen:
@@ -32,7 +36,7 @@ class RouteGeneratorService {
       case playlistDetailsScreen:
         return pageRouteBuilder(PlayListDetailsScreen(encodeId: map['encodeId'] as String), settings);
       case searchScreen:
-        return pageRouteBuilder(const SearchScreen(), settings);
+        return pageRouteBuilder(SearchScreen.provider(), settings);
       case speechToTextScreen:
         return pageRouteBuilder(const SpeechToTextScreen(), settings);
       case top100PlaylistScreen:

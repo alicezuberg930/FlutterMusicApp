@@ -9,7 +9,6 @@ import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/lyrics.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/services/api_service.dart';
-import 'package:flutter_music_app/widgets/song_card.dart';
 import 'package:lyrics_parser/lyrics_parser.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/utils.dart';
 import 'package:flutter_music_app/models/artist.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_music_app/models/playlist.dart';
 import 'package:flutter_music_app/models/section.dart';
 import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/video.dart';
-import 'package:flutter_music_app/services/api_service.dart';
+import 'package:flutter_music_app/screens/artist_details_screen/cubit/artist_details_cubit.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:flutter_music_app/widgets/playlist_card.dart';
 import 'package:flutter_music_app/widgets/playlist_list.dart';
@@ -17,24 +18,25 @@ class ArtistDetailsScreen extends StatefulWidget {
   final String alias;
   const ArtistDetailsScreen({super.key, required this.alias});
 
+  static BlocProvider<ArtistDetailsCubit> provider({required String alias}) {
+    return BlocProvider(
+      create: (context) => ArtistDetailsCubit(),
+      child: ArtistDetailsScreen(alias: alias),
+    );
+  }
+
   @override
   State<ArtistDetailsScreen> createState() => _ArtistDetailsScreenState();
 }
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
-  Artist? artist;
-
   @override
   void initState() {
-    ApiService.getArtist(name: widget.alias).then((value) {
-      setState(() {
-        artist = value;
-      });
-    });
+    context.read<ArtistDetailsCubit>().getArtistDetails(name: widget.alias);
     super.initState();
   }
 
-  topAlbumWidget() {
+  topAlbumWidget(Artist? artist) {
     return artist!.topAlbum != null
         ? Container(
             margin: const EdgeInsets.only(top: 20),
@@ -52,7 +54,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             ),
             padding: const EdgeInsets.all(8),
             child: PlaylistCard(
-              playlist: artist!.topAlbum!,
+              playlist: artist.topAlbum!,
               axis: Axis.horizontal,
             ),
           )
@@ -298,7 +300,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
     );
   }
 
-  informationWidget() {
+  informationWidget(Artist? artist) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,7 +313,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
           children: [
             const Text("Real name", style: TextStyle(color: Colors.grey)),
             const SizedBox(width: 20),
-            Text(artist!.realname!),
+            Text(artist.realname!),
           ],
         ),
         const SizedBox(height: 10),
@@ -319,7 +321,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
           children: [
             const Text("Birthday", style: TextStyle(color: Colors.grey)),
             const SizedBox(width: 20),
-            Text(artist!.birthday!),
+            Text(artist.birthday!),
           ],
         ),
         const SizedBox(height: 10),
@@ -327,7 +329,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
           children: [
             const Text("Nationality", style: TextStyle(color: Colors.grey)),
             const SizedBox(width: 20),
-            Text(artist!.national!),
+            Text(artist.national!),
           ],
         ),
         const SizedBox(height: 20),
@@ -335,14 +337,14 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
     );
   }
 
-  artistSectionListWidget() {
+  artistSectionListWidget(Artist? artist) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       separatorBuilder: (context, index) => const SizedBox(height: 30),
       itemCount: artist!.sections!.length,
       itemBuilder: (context, index) {
-        Section section = artist!.sections![index];
+        Section section = artist.sections![index];
         return Column(
           children: [
             if (section.items.isNotEmpty) ...[
@@ -362,74 +364,85 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: artist != null
-          ? CustomScrollView(
-              shrinkWrap: true,
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: Colors.white,
-                  pinned: true,
-                  snap: false,
-                  floating: false,
-                  expandedHeight: 350,
-                  actions: [
-                    IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
-                  ],
-                  iconTheme: const IconThemeData(color: Colors.black),
-                  flexibleSpace: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Calculate the opacity of the title based on the collapse percentage
-                      final double opacity = (constraints.maxHeight - kToolbarHeight) / (350 - kToolbarHeight);
-                      return FlexibleSpaceBar(
-                        title: Opacity(
-                          opacity: 1 - opacity.clamp(0.0, 1.0), // Title is hidden when opacity is 0
-                          child: Text(artist!.name!),
-                        ),
-                        background: Stack(
-                          alignment: Alignment.bottomLeft,
-                          children: [
-                            Image.network(
-                              artist!.thumbnailM!,
-                              fit: BoxFit.cover,
-                              width: MediaQuery.of(context).size.width,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(25),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+      body: BlocBuilder<ArtistDetailsCubit, ArtistDetailsCubitState>(
+        builder: (context, state) {
+          if (state is ArtistDetailsLoadingState) {
+            return const Center(child: CircularProgressIndicator(color: Colors.purple));
+          }
+          if (state is GetArtistDetailsState) {
+            return state.artist != null
+                ? CustomScrollView(
+                    shrinkWrap: true,
+                    slivers: [
+                      SliverAppBar(
+                        backgroundColor: Colors.white,
+                        pinned: true,
+                        snap: false,
+                        floating: false,
+                        expandedHeight: 350,
+                        actions: [
+                          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+                        ],
+                        iconTheme: const IconThemeData(color: Colors.black),
+                        flexibleSpace: LayoutBuilder(
+                          builder: (context, constraints) {
+                            // Calculate the opacity of the title based on the collapse percentage
+                            final double opacity = (constraints.maxHeight - kToolbarHeight) / (350 - kToolbarHeight);
+                            return FlexibleSpaceBar(
+                              title: Opacity(
+                                opacity: 1 - opacity.clamp(0.0, 1.0), // Title is hidden when opacity is 0
+                                child: Text(state.artist!.name!),
+                              ),
+                              background: Stack(
+                                alignment: Alignment.bottomLeft,
                                 children: [
-                                  Text(
-                                    artist!.name!,
-                                    style: const TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+                                  Image.network(
+                                    state.artist!.thumbnailM!,
+                                    fit: BoxFit.cover,
+                                    width: MediaQuery.of(context).size.width,
                                   ),
-                                  Text(
-                                    "${(artist!.totalFollow ?? 0).toString()} followers",
-                                    style: const TextStyle(color: Colors.white),
+                                  Padding(
+                                    padding: const EdgeInsets.all(25),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          state.artist!.name!,
+                                          style: const TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          "${(state.artist!.totalFollow ?? 0).toString()} followers",
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                ),
-                SliverToBoxAdapter(
-                    child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      topAlbumWidget(),
-                      artistSectionListWidget(),
-                      informationWidget(),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            children: [
+                              topAlbumWidget(state.artist),
+                              artistSectionListWidget(state.artist),
+                              informationWidget(state.artist),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
-                  ),
-                )),
-              ],
-            )
-          : const Center(child: CircularProgressIndicator(color: Colors.purple)),
+                  )
+                : const Center(child: Text("No details"));
+          }
+          return const Center(child: CircularProgressIndicator(color: Colors.purple));
+        },
+      ),
     );
   }
 }
