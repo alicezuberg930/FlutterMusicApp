@@ -4,7 +4,8 @@ import 'package:flutter_music_app/models/section.dart';
 import 'package:flutter_music_app/screens/artist_details_screen/artist_details_screen.dart';
 import 'package:flutter_music_app/screens/all_song_screen.dart';
 import 'package:flutter_music_app/screens/home_screen/home_screen.dart';
-import 'package:flutter_music_app/screens/playlist_details_screen.dart';
+import 'package:flutter_music_app/screens/playlist_details_screen/playlist_details_screen.dart';
+import 'package:flutter_music_app/screens/playlist_search_screen.dart/playlist_search_screen.dart';
 import 'package:flutter_music_app/screens/search_screen/search_screen.dart';
 import 'package:flutter_music_app/screens/speech_to_text_screen.dart';
 import 'package:flutter_music_app/screens/top100_playlists_screen.dart';
@@ -19,22 +20,19 @@ class RouteGeneratorService {
   static const String speechToTextScreen = '/speech-to-text-screen';
   static const String top100PlaylistScreen = '/top-100-playlist-screen';
   static const String videoPlayerScreen = '/video-player-screen';
+  static const String playlistSearchScreen = '/playlist-search-screen';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     Map<String, dynamic> map = settings.arguments != null ? settings.arguments as Map<String, dynamic> : {};
     switch (settings.name) {
       case artistDetailsScreen:
-        // return MaterialPageRoute(
-        //   builder: (context) => ArtistDetailsScreen.provider(alias: map['alias'] as String),
-        //   settings: settings,
-        // );
         return pageRouteBuilder(ArtistDetailsScreen.provider(alias: map['alias'] as String), settings);
       case homeScreen:
         return pageRouteBuilder(HomeScreen.provider(), settings);
       case allSongScreen:
         return pageRouteBuilder(AllSongScreen(songs: map['songs'] as List<Song>), settings);
       case playlistDetailsScreen:
-        return pageRouteBuilder(PlayListDetailsScreen(encodeId: map['encodeId'] as String), settings);
+        return pageRouteBuilder(PlayListDetailsScreen.provider(encodeId: map['encodeId'] as String), settings);
       case searchScreen:
         return pageRouteBuilder(SearchScreen.provider(), settings);
       case speechToTextScreen:
@@ -43,6 +41,8 @@ class RouteGeneratorService {
         return pageRouteBuilder(Top100PlaylistsScreen(top100s: map['top100s'] as List<Section>), settings);
       case videoPlayerScreen:
         return pageRouteBuilder(VideoPlayerScreen(encodeId: map['encodeId'] as String), settings);
+      case playlistSearchScreen:
+        return pageRouteBuilder(PlaylistSearchScreen.provider(songs: map['songs'] as List<Song>), settings);
       default:
         return errorRoute();
     }

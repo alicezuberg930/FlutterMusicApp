@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_music_app/common/constants.dart';
 import 'package:flutter_music_app/common/shared_preference.dart';
-import 'package:flutter_music_app/screens/home_screen/home_screen.dart';
 import 'package:flutter_music_app/services/http_service.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
 import 'package:google_fonts/google_fonts.dart';

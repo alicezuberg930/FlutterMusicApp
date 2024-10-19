@@ -51,7 +51,7 @@ class ApiService {
       });
       if (response.data['err'] == 0) {
         List<Song> songs = [];
-        response.data["data"]['items'][2]['items']['all'].forEach((song) => songs.add(Song.fromJson(song)));
+        (response.data["data"]['items'] as List).firstWhere((item) => item['sectionType'] == "new-release")['items']['all'].forEach((song) => songs.add(Song.fromJson(song)));
         return songs;
       } else if (response.data['err'] != 0) {
         UIHelpers.showSnackBar(message: response.data['msg']);

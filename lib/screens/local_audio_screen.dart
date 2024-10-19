@@ -14,6 +14,8 @@ class LocalAudioScreen extends StatefulWidget {
 class _LocalAudioScreenState extends State<LocalAudioScreen> {
   OnAudioQuery audioQuery = OnAudioQuery();
   bool isAudioAllowed = false;
+  late PermissionStatus storagePermission;
+  List<Song> tempSongs = [];
 
   @override
   void initState() {
@@ -22,7 +24,7 @@ class _LocalAudioScreenState extends State<LocalAudioScreen> {
   }
 
   handlePermission() async {
-    PermissionStatus storagePermission = await Permission.manageExternalStorage.request();
+    storagePermission = await Permission.audio.request();
     if (storagePermission.isGranted) {
       setState(() => isAudioAllowed = true);
     } else {

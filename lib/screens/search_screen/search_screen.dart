@@ -9,6 +9,7 @@ import 'package:flutter_music_app/models/song.dart';
 import 'package:flutter_music_app/models/video.dart';
 import 'package:flutter_music_app/screens/search_screen/cubit/search_cubit.dart';
 import 'package:flutter_music_app/services/route_generator_service.dart';
+import 'package:flutter_music_app/widgets/custom_search_bar.dart';
 import 'package:flutter_music_app/widgets/song_card.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -162,7 +163,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "${Utils.formatNumber(artists[index].totalFollow!)} follows",
+                      "${Utils.formatNumber(artists[index].totalFollow ?? 0)} follows",
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.black.withOpacity(0.5)),
                     ),
                   ],
@@ -234,23 +235,18 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     );
   }
 
-  searchBarWidget() {
-    return TextFormField(
-      onChanged: (value) {
-        debouncer.run(() {
-          context.read<SearchCubit>().search(query: value);
-        });
-      },
-      controller: searchController,
-      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(0),
-        filled: true,
-        fillColor: Colors.grey[200],
-        hintText: "Type your query",
-        hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black),
-        prefixIcon: const Icon(Icons.search, color: Colors.black),
-        suffixIcon: GestureDetector(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: CustomSearchBar(
+          onChanged: (value) {
+            debouncer.run(() {
+              context.read<SearchCubit>().search(query: value);
+            });
+          },
           onTap: () {
             Constants.navigatorKey!.currentState!.pushNamed(RouteGeneratorService.speechToTextScreen).then(
               (value) {
@@ -262,23 +258,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               },
             );
           },
-          child: const Icon(Icons.mic, color: Colors.blue),
+          controller: searchController,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        title: searchBarWidget(),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: TabBar(
